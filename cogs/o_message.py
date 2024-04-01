@@ -1,6 +1,6 @@
 import disnake
 from disnake.ext import commands
-from .module import RequestDataBase as Rdb
+from .module import RequestDataBaseZarato as Rdb
 import random
 import time
 
@@ -10,6 +10,8 @@ class Message(commands.Cog):
     def __init__(self, bot=commands.Bot):
         self.bot = bot
     
+    #! Переработать ивент сообщения разделив их на 2 системы
+    #! Не трогать систему ответов поняшки, она общая для серверов
     @commands.Cog.listener()
     async def on_message(self, message):
         user = message.author.id
@@ -19,6 +21,7 @@ class Message(commands.Cog):
             return
         else:
             db.Check(user).user()
+        
         
         # Проверка актуальности уровня
         userExpNow= db.Info(user_id=user).user()[2]

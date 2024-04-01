@@ -1,7 +1,7 @@
 import disnake
 from disnake.ext import commands
 
-from .module import RequestDataBase as Rdb
+from .module import RequestDataBaseZarato as Rdb
 import os
 
 db = Rdb.DataBase
@@ -14,6 +14,10 @@ class Admin(commands.Cog):
     @commands.has_permissions(administrator=True) 
     @commands.command(name='addch', aliases=['реакт'])
     async def addChannel(self, ctx):
+        if not ctx.guild is None:
+            serverT= [1199488197885968515, 958063150144577558] # Дом поняшки, сервер зарато
+            if ctx.guild.id not in serverT:
+                return
 
         # Открытие файла
         file = open(f'../bots/acesses/{ctx.guild.id}.txt', mode="a+")
@@ -52,6 +56,10 @@ class Admin(commands.Cog):
     # ? Позже добавить права на эту команду
     @commands.has_permissions(administrator=True) 
     async def baned_channel(self, ctx):
+        if not ctx.guild is None:
+            serverT= [1199488197885968515, 958063150144577558] # Дом поняшки, сервер зарато
+            if ctx.guild.id not in serverT:
+                return
 
         # Считка параметров файла
         file = open(f'../bots/acesses/{ctx.guild.id}.txt', mode="a+")
@@ -76,6 +84,10 @@ class Admin(commands.Cog):
     @commands.command(name='exp')
     @commands.has_permissions(administrator=True)
     async def exp(self, ctx):
+        if not ctx.guild is None:
+            serverT= [1199488197885968515, 958063150144577558] # Дом поняшки, сервер зарато
+            if ctx.guild.id not in serverT:
+                return
 
         user = ctx.message.author.id
         content = ctx.message.content

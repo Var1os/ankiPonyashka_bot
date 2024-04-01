@@ -1,4 +1,4 @@
-from .module import RequestDataBase as Rdb
+from .module import RequestDataBaseZarato as Rdb
 
 import disnake
 from disnake.ext import commands
@@ -61,6 +61,10 @@ class Until(commands.Cog):
     
     @commands.command(name='leaders', aliases=['lead', 'лидеры', 'топ', 'лид'])
     async def leaders(self, ctx):
+        if not ctx.guild is None:
+            serverT= [1199488197885968515, 958063150144577558] # Дом поняшки, сервер зарато
+            if ctx.guild.id not in serverT:
+                return
 
         user = ctx.message.author.id
         usersE = db.Info().all('user')
@@ -183,6 +187,10 @@ class Until(commands.Cog):
 
     @commands.command(name='wait')
     async def wait(self, ctx):
+        if not ctx.guild is None:
+            serverT= [1199488197885968515, 958063150144577558] # Дом поняшки, сервер зарато
+            if ctx.guild.id not in serverT:
+                return
 
         bot = self.bot
         channel = ctx.message.channel
@@ -239,7 +247,7 @@ class Until(commands.Cog):
 
         await self.Timer(ctx= ctx, times=timeValue, message=message, bot= self.bot).start()
 
-    #! голосовалка
+    #! Прослушка
     @commands.Cog.listener('on_button_click')
     async def test2_listener(self, inter: disnake.MessageInteraction):
         if inter.component.custom_id not in ['accpt', 'cannel']:

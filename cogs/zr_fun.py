@@ -1,4 +1,4 @@
-from .module import RequestDataBase as Rdb
+from .module import RequestDataBaseZarato as Rdb
 from .module.Slicer import PagReact as pag
 
 import random
@@ -22,6 +22,10 @@ class Fun(commands.Cog):
     # ! переработать позже
     @commands.command(name='rand', aliases=['рандом', 'ранд', 'случ'])
     async def rand(self, ctx):
+        if not ctx.guild is None:
+            serverT= [1199488197885968515, 958063150144577558] # Дом поняшки, сервер зарато
+            if ctx.guild.id not in serverT:
+                return
         mess = ctx.message.content.split(' ')
         elements = []
         try:
@@ -62,6 +66,10 @@ class Fun(commands.Cog):
 
     @commands.command(name='gifadd', aliases=['добгиф', 'новгиф'])
     async def gifadd(self, ctx):
+        if not ctx.guild is None:
+            serverT= [1199488197885968515, 958063150144577558] # Дом поняшки, сервер зарато
+            if ctx.guild.id not in serverT:
+                return
         file = open('../bots/content/Gif/base.txt', mode='r')
 
         try:
@@ -89,6 +97,10 @@ class Fun(commands.Cog):
 
     @commands.command(name='rollete', aliases=['rr', 'рулетка', 'russianRollete'])
     async def russianRollete(self, ctx):
+        if not ctx.guild is None:
+            serverT= [1199488197885968515, 958063150144577558] # Дом поняшки, сервер зарато
+            if ctx.guild.id not in serverT:
+                return
 
         user = ctx.message.author.id
         db.Check(user_id=user).user()
