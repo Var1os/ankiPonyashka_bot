@@ -1,5 +1,4 @@
 import disnake
-import os
 from disnake.ext import commands
 
 bot = commands.Bot(command_prefix='~', 
@@ -19,5 +18,4 @@ bot.load_extension('cogs.zr_message')
 bot.load_extension('cogs.zr_emotionalPony')
 # Загрузка модулй "Тетра"
 
-token = os.environ["token"]
-bot.run(token)
+bot.run(open("token.txt", 'r').readline())  
