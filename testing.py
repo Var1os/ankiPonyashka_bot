@@ -1,0 +1,1 @@
+inp= int(input('Ent: '))
