@@ -21,7 +21,10 @@ class Message(commands.Cog):
             return
         else:
             db.Check(user).user()
-        
+
+        if not message.raw_mentions is None:
+            ment= message.raw_mentions[0]
+            pass
         
         # Проверка актуальности уровня
         userExpNow= db.Info(user_id=user).user()[2]

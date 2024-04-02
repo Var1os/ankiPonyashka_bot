@@ -15,10 +15,10 @@ class DataBase:
         def user(self):
             num= 0
             # Основная таблица юзера
-            cur.execute(f'SELECT uid FROM user WHERE uid = {self.user_id}')
+            cur.execute(f'SELECT * FROM user WHERE uid = {self.user_id}')
             if cur.fetchone() is None:
                 num+= 1
-                cur.execute("INSERT INTO user VALUES (?, ?, ?, ?)", (self.user_id, 0, 0, 500))
+                cur.execute("INSERT INTO user VALUES (?, ?, ?, ?, ?)", (self.user_id, 0, 0, 500, 0))
             # Таблица денег
             cur.execute(f'SELECT uid FROM money WHERE uid = {self.user_id}')
             if cur.fetchone() is None:
