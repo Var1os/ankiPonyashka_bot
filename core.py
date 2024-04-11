@@ -7,19 +7,13 @@ bot = commands.Bot(command_prefix='~',
                    reload=True, 
                    help_command=None)
 
-# Общие модули поняшки
-bot.load_extension('cogs.o_message')
-
-# Загрузка модулей "Зартао"
-bot.load_extension('cogs.zr_economy')
-bot.load_extension('cogs.zr_events')
-bot.load_extension('cogs.zr_fun')
-bot.load_extension('cogs.zr_rpg')
-bot.load_extension('cogs.zr_administrator')
-bot.load_extension('cogs.zr_until')
-bot.load_extension('cogs.zr_emotionalPony')
-
-# Загрузка модулй "Тетра"
-bot.load_extension('cogs.tr_rpg')
+bot.load_extension('cogs.Message')
+bot.load_extension('cogs.Economy')
+bot.load_extension('cogs.Events')
+bot.load_extension('cogs.Fun')
+bot.load_extension('cogs.Rpg')
+bot.load_extension('cogs.Administrator')
+bot.load_extension('cogs.Until')
+bot.load_extension('cogs.EmotionalPony')
 
 bot.run(open("token.txt", 'r').readline())  

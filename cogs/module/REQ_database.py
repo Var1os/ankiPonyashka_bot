@@ -1,24 +1,23 @@
 import sqlite3
 import time
 
-con = sqlite3.connect('../bots/Date_base_tetra.db')
+con = sqlite3.connect('../bots/database.db')
 cur = con.cursor()
+
+# DataBase.Check(user_id=9000).user()
 
 class DataBase:
     class Check:
         # Передать id пользователя
-        def __init__(
-                self,
-                user_id = None
-        ):
-            self.user_id = user_id
+        def __init__(self, user_id = None):
+            self.user_id= user_id
         def user(self):
             num= 0
             # Основная таблица юзера
-            cur.execute(f'SELECT uid FROM user WHERE uid = {self.user_id}')
+            cur.execute(f'SELECT * FROM user WHERE uid = {self.user_id}')
             if cur.fetchone() is None:
                 num+= 1
-                cur.execute("INSERT INTO user VALUES (?, ?, ?, ?)", (self.user_id, 0, 0, 500))
+                cur.execute("INSERT INTO user VALUES (?, ?, ?, ?, ?)", (self.user_id, 0, 0, 500, 0))
             # Таблица денег
             cur.execute(f'SELECT uid FROM money WHERE uid = {self.user_id}')
             if cur.fetchone() is None:

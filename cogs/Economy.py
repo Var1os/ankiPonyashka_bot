@@ -1,4 +1,4 @@
-from .module import RequestDataBaseZarato as Rdb
+from .module import REQ_database as Rdb
 from .module.Slicer import PagReact as pag
 
 import random
@@ -15,10 +15,6 @@ class Economycs(commands.Cog):
     
     @commands.command(name='work')
     async def work(self, ctx):
-        if not ctx.guild is None:
-            serverT= [1199488197885968515, 958063150144577558] # Дом поняшки, сервер зарато
-            if ctx.guild.id not in serverT:
-                return
 
         user = ctx.message.author.id
         db.Check(user_id= user).user()
@@ -76,10 +72,6 @@ class Economycs(commands.Cog):
 
     @commands.command(name='stat', aliases=['statistic', 'стат', 'статус', 'профиль'])
     async def stat(self, ctx):
-        if not ctx.guild is None:
-            serverT= [1199488197885968515, 958063150144577558] # Дом поняшки, сервер зарато
-            if ctx.guild.id not in serverT:
-                return
 
         self.user = ctx.message.author.id
         db.Check(user_id= self.user).user()
@@ -173,10 +165,6 @@ class Economycs(commands.Cog):
         
     @commands.command(name='tran', aliases=['перевод', 'перед'])
     async def tran(self, ctx):
-        if not ctx.guild is None:
-            serverT= [1199488197885968515, 958063150144577558] # Дом поняшки, сервер зарато
-            if ctx.guild.id not in serverT:
-                return
 
         self.user = ctx.message.author.id
         db.Check(user_id=self.user).user()
@@ -324,10 +312,6 @@ class Economycs(commands.Cog):
     # formyla = n // (n + 100)
     @commands.command(name='craft', aliases=['crt', 'крафт'])
     async def craft(self, ctx):
-        if not ctx.guild is None:
-            serverT= [1199488197885968515, 958063150144577558] # Дом поняшки, сервер зарато
-            if ctx.guild.id not in serverT:
-                return
 
         self.user = ctx.message.author.id
         db.Check(user_id=self.user).user()
@@ -347,9 +331,6 @@ class Economycs(commands.Cog):
 
         await ctx.send(embed=embed, components=components)
 
-    @commands.command()
-    async def lofi(self):
-        pass
 
 # Загрузка кога в основное ядро по команде
 def setup(bot:commands.Bot):

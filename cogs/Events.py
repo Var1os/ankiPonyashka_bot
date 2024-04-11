@@ -1,6 +1,6 @@
 import disnake
 from disnake.ext import commands
-from .module import RequestDataBaseZarato as Rdb
+from .module import REQ_database as Rdb
 
 db = Rdb.DataBase
 

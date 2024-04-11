@@ -1,4 +1,4 @@
-from .module import RequestDataBaseZarato as Rdb
+from .module import REQ_database as Rdb
 import random
 import time
 import disnake

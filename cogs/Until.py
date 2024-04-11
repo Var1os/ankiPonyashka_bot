@@ -1,4 +1,4 @@
-from .module import RequestDataBaseZarato as Rdb
+from .module import REQ_database as Rdb
 
 import disnake
 from disnake.ext import commands
@@ -61,10 +61,6 @@ class Until(commands.Cog):
     
     @commands.command(name='leaders', aliases=['lead', 'лидеры', 'топ', 'лид'])
     async def leaders(self, ctx):
-        if not ctx.guild is None:
-            serverT= [1199488197885968515, 958063150144577558] # Дом поняшки, сервер зарато
-            if ctx.guild.id not in serverT:
-                return
 
         user = ctx.message.author.id
         usersE = db.Info().all('user')
@@ -187,11 +183,7 @@ class Until(commands.Cog):
 
     @commands.command(name='wait')
     async def wait(self, ctx):
-        if not ctx.guild is None:
-            serverT= [1199488197885968515, 958063150144577558] # Дом поняшки, сервер зарато
-            if ctx.guild.id not in serverT:
-                return
-
+        
         bot = self.bot
         channel = ctx.message.channel
         user = ctx.message.author.id
@@ -273,9 +265,7 @@ class Until(commands.Cog):
             embed= disnake.Embed(title='Голосование', description=f'за: {self.index_acpt}\nпротив: {self.index_cann}')
             await inter.response.edit_message(embed=embed, components=None)
         await inter.response.edit_message(embed=embed)
-
-        
-
+       
     @commands.command()
     async def test2(self, ctx):
 
