@@ -7,7 +7,7 @@ import discord
 import time
 
 db = Rdb.DataBase
-# Основное тело селектора
+#! Основное тело селектора
 # тело самой команды, что вызывает данный селектор на 63 строке
 class DropDownMenu(disnake.ui.StringSelect):
     def __init__(self, map:map, user:int):
@@ -54,6 +54,29 @@ class DropDownView(disnake.ui.View):
         self.user= user
         super().__init__(timeout=25.0)
         self.add_item(DropDownMenu(self.map, self.user))
+
+#! Селектор для команды !help
+# Тело команды, вызов селектора на 212 строке
+class DropDownMenuHelp(disnake.ui.StringSelect):
+    def __init__(self, map:map, user:int):
+        self.index= 0
+        self.map= map
+        self.user= user
+
+        options = [
+            disnake.SelectMenu(label='Обычные команды'),
+            disnake.SelectMenu(label='Административные команды'),
+            disnake.SelectMenu(label='РПГ команды'),
+            disnake.SelectMenu(label='Экономические команды'),
+            disnake.SelectMenu(lavel='Утилиты')
+        ]
+
+        if map is None:
+            raise 'Not have map: [components] [embed]'
+    
+    async def callback(self, interaction: disnake.MessageInteraction):
+        pass
+        
 
 class Until(commands.Cog):
     def __init__(self, bot=commands.Bot):
@@ -204,6 +227,12 @@ class Until(commands.Cog):
         if msg:
             await channel.send(self.text)
     
+
+    @commands.command(name='help', aliases=['хелп', 'помощь', 'команды'])
+    async def help(self, ctx):
+        pass
+
+
     #! Таймер
     class Timer:
         def __init__(self, ctx, times, message, bot):

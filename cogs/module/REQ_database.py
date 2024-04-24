@@ -17,7 +17,7 @@ class DataBase:
             cur.execute(f'SELECT * FROM user WHERE uid = {self.user_id}')
             if cur.fetchone() is None:
                 num+= 1
-                cur.execute("INSERT INTO user VALUES (?, ?, ?, ?, ?)", (self.user_id, 0, 0, 500, 0))
+                cur.execute("INSERT INTO user VALUES (?, ?, ?, ?, ?, ?)", (self.user_id, 0, 0, 500, 0, 0))
             # Таблица денег
             cur.execute(f'SELECT uid FROM money WHERE uid = {self.user_id}')
             if cur.fetchone() is None:
@@ -287,6 +287,23 @@ class DataBase:
             cur.execute(f'UPDATE user SET {self.column} = {self.value} WHERE uid = {self.user_id}')
             con.commit()
             return True
+        
+        def upParam(self):
+            cur.execute(f'UPDATE user SET {self.column} = {self.column} + {self.value} WHERE uid = {self.user_id}')
+            con.commit()
+            return True
+        
+        def downParam(self):
+            cur.execute(f'UPDATE user SET {self.column} = {self.column} - {self.value} WHERE uid = {self.user_id}')
+            con.commit()
+            return True
+        
+        def lockMent(self):
+            times = round(time.time()) + self.value
+            cur.execute(f'UPDATE user SET MentTimer = {times} WHERE uid = {self.user_id}')
+            con.commit()
+            return True
+
     class BotMood:
         def __init__(self, user: int= None):
             self.user = user

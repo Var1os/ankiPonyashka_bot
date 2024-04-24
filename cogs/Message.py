@@ -20,9 +20,17 @@ class Message(commands.Cog):
         else:
             db.Check(user).user()
 
-        '''if not message.raw_mentions is None:
-            ment= message.raw_mentions[0]
-            pass'''
+        mentioned = message.raw_mentions
+        if (mentioned is not None):
+            try:
+                ment= message.raw_mentions[0]
+                user_data = db.Info(user_id=user).user()
+                if (user_data[5] < round(time.time())) and ment != user:
+                    db.User(user_id=ment, value=1, column='mentions').upParam()
+                    db.User(user_id=user, value=30).lockMent()
+            except:
+                pass
+            
         
         # Проверка актуальности уровня
         userExpNow= db.Info(user_id=user).user()[2]

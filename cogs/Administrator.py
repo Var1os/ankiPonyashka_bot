@@ -75,7 +75,7 @@ class Admin(commands.Cog):
     
     @commands.command(name='exp')
     @commands.has_permissions(administrator=True)
-    async def exp(self, ctx):
+    async def exp(self, ctx):   
 
         user = ctx.message.author.id
         content = ctx.message.content

@@ -3,7 +3,7 @@ from disnake.ext import commands
 
 bot = commands.Bot(command_prefix='~', 
                    intents=disnake.Intents.all(), 
-                   activity= disnake.Activity(name='версия 2.0!', type= disnake.ActivityType.playing),
+                   activity= disnake.Activity(name='fu-fu-fu', type= disnake.ActivityType.playing),
                    reload=True, 
                    help_command=None)
 
