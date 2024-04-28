@@ -24,14 +24,14 @@ class Economycs(commands.Cog):
             count = random.randint(5, 40)
             
             # Аудит заработка в консоль
-            times = time.strftime('%H:%M', time.gmtime(round(time.time() + 36000)))
+            times = time.strftime('%H:%M', time.gmtime(round(time.time() + 18000)))
             print(f'{ctx.message.author.name} заработал {count} эссенций в {times}')
 
             # Взаимодействие с валютой
             db.Money(user= user, currency='essence', value=count).add
             db.Money(user= user).lock(valueLock=3600, lockLvl='low')
 
-            emb = disnake.Embed(title=f"Заработано - {count} MaCoin(ов)", colour=disnake.Color.dark_gold())
+            emb = disnake.Embed(title=f"Заработано - {count} Эссенций(es)", colour=disnake.Color.dark_gold())
         else:
             times = time.strftime('%H:%M:%S', time.gmtime(db.Money(user= user).lockTake() - time.time()))
             emb = disnake.Embed(description=f'Остудись, ещё не время работать.\nОсталось подождать: {times}', colour=disnake.Color.red())
@@ -41,33 +41,38 @@ class Economycs(commands.Cog):
     #! Прослушка
     @commands.Cog.listener('on_button_click')
     async def stat_list(self, inter: disnake.MessageInteraction):
-        if inter.component.custom_id not in ['next', 'back', 'dropStat']:
-            return
-        if self.user != inter.author.id:
-            await inter.response.send_message('Данное сообщение вызвали не вы', ephemeral=True)
-            return
-            #! Расписать ответ для других пользователей
+        try:
+            if inter.component.custom_id not in ['next', 'back', 'dropStat']:
+                return
+            if self.user != inter.author.id:
+                await inter.response.send_message('Данное сообщение вызвали не вы', ephemeral=True)
+                return
+                #! Расписать ответ для других пользователей
 
-        if self.timeout < round(time.time()):
-            embed = disnake.Embed(title='Паспорт',description='_Окно было закрыто..._\n_Вышло время_').set_thumbnail(url=inter.author.avatar)
+            if self.timeout < round(time.time()):
+                embed = disnake.Embed(title='Паспорт',description='_Закрыт..._\n_Вышло время_').set_thumbnail(url=inter.author.avatar)
+                await inter.response.edit_message(embed=embed, components=None)
+                return
+            
+            if inter.component.custom_id == 'next':
+                if self.index+1 > len(self.embeds)-1:
+                    await inter.response.edit_message(embed=self.embeds[self.index])
+                    return
+                self.index+= 1
+                await inter.response.edit_message(embed=self.embeds[self.index])
+            elif inter.component.custom_id == 'back':
+                if self.index-1 < 0:
+                    await inter.response.edit_message(embed=self.embeds[self.index])
+                    return
+                self.index-= 1
+                await inter.response.edit_message(embed=self.embeds[self.index])
+            elif inter.component.custom_id == 'dropStat':
+                embed = disnake.Embed(title='Паспорт',description='_Закрыт..._').set_thumbnail(url=inter.author.avatar)
+                await inter.response.edit_message(embed=embed, components=None)
+        except:
+            embed = disnake.Embed(title='Паспорт',description='_Закрыт..._\n_Вышло время_').set_thumbnail(url=inter.author.avatar)
             await inter.response.edit_message(embed=embed, components=None)
             return
-        
-        if inter.component.custom_id == 'next':
-            if self.index+1 > len(self.embeds)-1:
-                await inter.response.edit_message(embed=self.embeds[self.index])
-                return
-            self.index+= 1
-            await inter.response.edit_message(embed=self.embeds[self.index])
-        elif inter.component.custom_id == 'back':
-            if self.index-1 < 0:
-                await inter.response.edit_message(embed=self.embeds[self.index])
-                return
-            self.index-= 1
-            await inter.response.edit_message(embed=self.embeds[self.index])
-        elif inter.component.custom_id == 'dropStat':
-            embed = disnake.Embed(title='Паспорт',description='_Окно было закрыто..._').set_thumbnail(url=inter.author.avatar)
-            await inter.response.edit_message(embed=embed, components=None)
 
 
     @commands.command(name='stat', aliases=['statistic', 'стат', 'статус', 'профиль'])
@@ -141,23 +146,23 @@ class Economycs(commands.Cog):
         if inter.component.custom_id == "essence_soul" and trust:
             db.Money(user=self.user, currency='essence', value=self.value).sub()
             db.Money(user=self.mentioned, currency='essence', value=self.value).add()
-            emb = disnake.Embed(title=f'Вы перевели {self.value} эссенций')
+            emb = disnake.Embed(title=f'Вы перевели эссенции в количестве: {self.value}')
         # shard
         elif inter.component.custom_id == "shard_soul" and trust:
             db.Money(user=self.user, currency='shard', value=self.value).sub()
             db.Money(user=self.mentioned, currency='shard', value=self.value).add()
-            emb = disnake.Embed(title=f'Вы перевели {self.value} осколков')
+            emb = disnake.Embed(title=f'Вы перевели осколки в количестве: {self.value}')
             
         # soul
         elif inter.component.custom_id == "soul" and trust:
             db.Money(user=self.user, currency='soul', value=self.value).sub()
             db.Money(user=self.mentioned, currency='soul', value=self.value).add()
-            emb = disnake.Embed(title=f'Вы перевели {self.value} душ')
+            emb = disnake.Embed(title=f'Вы перевели души в количестве: {self.value}')
         # cristall
         elif inter.component.custom_id == "cristall_soul" and trust:
             db.Money(user=self.user, currency='cristall', value=self.value).sub()
             db.Money(user=self.mentioned, currency='cristall', value=self.value).add()
-            emb = disnake.Embed(title=f'Вы перевели {self.value} кристаллов')
+            emb = disnake.Embed(title=f'Вы перевели кристаллы в количестве: {self.value}')
         
         elif inter.component.custom_id == "cannel":
             emb = disnake.Embed(description='Вы забрали деньги обратно')

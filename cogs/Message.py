@@ -12,6 +12,7 @@ class Message(commands.Cog):
     
     @commands.Cog.listener()
     async def on_message(self, message):
+        
         user = message.author.id
         timeMessage = time.strftime('%H:%M', time.gmtime(round(time.time() + 36000)))
         # Проверка на ботовость того, кто отправил сообщение
