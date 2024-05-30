@@ -12,7 +12,7 @@ class Admin(commands.Cog):
     
     # ? Позже добавить права на эту команду
     @commands.has_permissions(administrator=True) 
-    @commands.command(name='addch', aliases=['реакт'])
+    @commands.command(name='addChannel', aliases=['ответы', 'addch'])
     async def addChannel(self, ctx):
 
         # Открытие файла
@@ -48,10 +48,10 @@ class Admin(commands.Cog):
             await ctx.send('Укажите каналы, для добавления')
         file.close()
     
-    @commands.command(name='baned_channel', aliases=['банканалы', 'нуль', 'bc'])
+    @commands.command(name='RChannel', aliases=['нуль', 'rc'])
     # ? Позже добавить права на эту команду
     @commands.has_permissions(administrator=True) 
-    async def baned_channel(self, ctx):
+    async def RChannel(self, ctx):
 
         # Считка параметров файла
         file = open(f'../bots/acesses/{ctx.guild.id}.txt', mode="a+")
@@ -114,7 +114,7 @@ class Admin(commands.Cog):
             mentioned = int(mentioned[0])
             if disnake.Guild.get_member(ctx.guild, mentioned).bot:
                 return await ctx.send('Не трожте ботов...')
-            db.Check(user_id=ctx.message.author.id).user
+            db.Check(user_id=ctx.message.author.id, user_name=ctx.message.author.name).user
 
         # Основное тело команды
         if operation == 'plus':

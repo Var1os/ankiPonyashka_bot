@@ -13,11 +13,11 @@ class Economycs(commands.Cog):
     def __init__(self, bot=commands.Bot):
         self.bot = bot
     
-    @commands.command(name='work')
+    @commands.command(name='work', aliases=['w', 'работа'])
     async def work(self, ctx):
 
         user = ctx.message.author.id
-        db.Check(user_id= user).user()
+        db.Check(user_id= user, user_name=ctx.message.author.name).user()
         
         if db.Money(user= user).checkTimeLock():
 
@@ -79,7 +79,7 @@ class Economycs(commands.Cog):
     async def stat(self, ctx):
 
         self.user = ctx.message.author.id
-        db.Check(user_id= self.user).user()
+        db.Check(user_id= self.user, user_name=ctx.message.author.name).user()
         db.Fun(user=self.user).maxis()
 
         baseStat = db.Info(user_id= self.user).user()
@@ -92,7 +92,7 @@ class Economycs(commands.Cog):
                             colour=disnake.Color.dark_gold(),
                             description=
                                 '''**Уровень:** {n1}\n**Опыт:** {n2:,d}\n**Любовь поняшки:** {n3}\n
-                                '''.format(n1= baseStat[1], n2= baseStat[2], n3= baseStat[3] - 500))
+                                '''.format(n1= baseStat[2], n2= baseStat[3], n3= baseStat[4] - 500))
         emb_main.set_thumbnail(url=ctx.message.author.avatar)
         emb_main.set_footer(text='страница [1/3]')
 
@@ -101,7 +101,7 @@ class Economycs(commands.Cog):
             colour=disnake.Color.dark_gold(),
             description=
                 '''**Эссенции:** {n1:,d}\n**Осколки:** {n2:,d}\n**Души:** {n3:,d}\n\n**Кристалльная душа:** {n4:,d}
-                '''.format(n1= moneyStat[1], n2= moneyStat[2], n3= moneyStat[3], n4= moneyStat[4]))
+                '''.format(n1= moneyStat[2], n2= moneyStat[3], n3= moneyStat[4], n4= moneyStat[5]))
         emb_money.set_thumbnail(url=ctx.message.author.avatar)
         emb_money.set_footer(text='страница [2/3]')
 
@@ -168,11 +168,11 @@ class Economycs(commands.Cog):
             emb = disnake.Embed(description='Вы забрали деньги обратно')
         await inter.response.edit_message(embed=emb, components=None)
         
-    @commands.command(name='tran', aliases=['перевод', 'перед'])
+    @commands.command(name='tran', aliases=['перевод', 'тран'])
     async def tran(self, ctx):
 
         self.user = ctx.message.author.id
-        db.Check(user_id=self.user).user()
+        db.Check(user_id=self.user, user_name=ctx.message.author.name).user()
         
         # Проверка на наличие количества передаваемой валюты
         try:
@@ -209,6 +209,7 @@ class Economycs(commands.Cog):
         cannel = btn.Button(style=disnake.ButtonStyle.danger, disabled=False, label='Отмена', custom_id="cannel")
         self.buttons = [button_es, button_ch, button_soul, button_cristal, cannel]
 
+        # Не передаётся user_name, так как это пока не требуется для системы
         db.Check(user_id=self.mentioned).user()
 
         await ctx.send(embed=emb, components=self.buttons)
@@ -315,11 +316,11 @@ class Economycs(commands.Cog):
                 return await inter.response.edit_message(embed=embed, components=None)
 
     # formyla = n // (n + 100)
-    @commands.command(name='craft', aliases=['crt', 'крафт'])
-    async def craft(self, ctx):
+    @commands.command(name='crafts', aliases=['cfs', 'крафтдуш'])
+    async def crafts(self, ctx):
 
         self.user = ctx.message.author.id
-        db.Check(user_id=self.user).user()
+        db.Check(user_id=self.user, user_name=ctx.message.author.name).user()
 
         # Проверка на наличия числового значения
         try:

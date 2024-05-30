@@ -9,20 +9,21 @@ cur = con.cursor()
 class DataBase:
     class Check:
         # Передать id пользователя
-        def __init__(self, user_id = None):
+        def __init__(self, user_id = None, user_name:str = None):
             self.user_id= user_id
+            self.user_name= user_name
         def user(self):
             num= 0
             # Основная таблица юзера
             cur.execute(f'SELECT * FROM user WHERE uid = {self.user_id}')
             if cur.fetchone() is None:
                 num+= 1
-                cur.execute("INSERT INTO user VALUES (?, ?, ?, ?, ?, ?)", (self.user_id, 0, 0, 500, 0, 0))
+                cur.execute("INSERT INTO user VALUES (?, ?, ?, ?, ?, ?, ?)", (self.user_id, self.user_name, 0, 0, 500, 0, 0))
             # Таблица денег
             cur.execute(f'SELECT uid FROM money WHERE uid = {self.user_id}')
             if cur.fetchone() is None:
                 num+= 1
-                cur.execute("INSERT INTO money VALUES (?, ?, ?, ?, ?)", (self.user_id, 0, 0, 0, 0))
+                cur.execute("INSERT INTO money VALUES (?, ?, ?, ?, ?, ?)", (self.user_id, self.user_name, 0, 0, 0, 0))
             # РПГ статы
             cur.execute(f'SELECT uid FROM rpg_stat WHERE uid = {self.user_id}')
             if cur.fetchone() is None:

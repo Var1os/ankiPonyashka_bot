@@ -87,11 +87,11 @@ class Fun(commands.Cog):
             file.writelines(f'{gifs[i]}\n')
         file.close()
 
-    @commands.command(name='rollete', aliases=['rr', 'рулетка', 'russianRollete'])
+    @commands.command(name='russianRollete', aliases=['rr', 'рулетка', 'rollete'])
     async def russianRollete(self, ctx):
 
         user = ctx.message.author.id
-        db.Check(user_id=user).user()
+        db.Check(user_id=user, user_name=ctx.message.author.name).user()
 
         # Проверка на указание числового значения
         try:
@@ -131,7 +131,7 @@ class Fun(commands.Cog):
     async def coin(self, ctx):
 
         user = ctx.message.author.id
-        db.Check(user_id=user).user()
+        db.Check(user_id=user, user_name=ctx.messsage.author.name).user()
 
         try:
             mess = ctx.message.content.split(' ')[1]

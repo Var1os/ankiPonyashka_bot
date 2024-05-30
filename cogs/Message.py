@@ -6,6 +6,17 @@ import time
 
 db = Rdb.DataBase
 
+class Answer:
+    def __init__(self) -> None:
+        file = open("../ReactDataBase.db")
+
+    def TakeAnswer(self, nickname:str):
+        pass
+
+    def TakeMoreAnswer(self, nicknames:list):
+        pass
+
+    
 class Message(commands.Cog):
     def __init__(self, bot=commands.Bot):
         self.bot = bot
@@ -19,7 +30,7 @@ class Message(commands.Cog):
         if message.author.bot:
             return
         else:
-            db.Check(user).user()
+            db.Check(user_id=message.author.id, user_name=message.author.name).user()
 
         mentioned = message.raw_mentions
         if (mentioned is not None):
@@ -35,12 +46,12 @@ class Message(commands.Cog):
         
         # Проверка актуальности уровня
         userExpNow= db.Info(user_id=user).user()[2]
-        userLvlNow= db.Info(user_id=user).user()[1]
+        userLvlNow= db.Info(user_id=user).user()[2]
         userLvl = db.Info().whatIsLvl(exp=userExpNow)
-        if userLvl > userLvlNow:
+        if userLvl != userLvlNow:
             db.User(column='lvl', user_id=user, value=userLvl).setParam()
             await self.bot.get_channel(1205649033125830706).send(
-                f'У {message.author.global_name} Повышен уровень c {userLvlNow} до {userLvl}')
+                f'У {message.author.global_name} изменение опыта с {userLvlNow} до {userLvl}')
 
         # Проверка таймера реакций
         if db.Bot(self).checkLock():
@@ -128,6 +139,8 @@ class Message(commands.Cog):
         react_role = ["пони", "поня", "понь", "поню", "поняш", "поняшь", "pony", "ponyash", "поняшка",
               "понёй", "поняхи", "понем", "понём", "поняшки"]
 
+        if message.author.id == 374061361606688788:
+            return
         # Отклик поняшки на слова, что указаны в [строчке 113]
         for content in content.split(' '):
             for react in react_role:
