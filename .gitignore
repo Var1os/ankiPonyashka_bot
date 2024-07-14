@@ -2,5 +2,7 @@ token.txt
 testing.py
 content/
 acesses/
+config/
 
 database.db
+RPG_base.db
