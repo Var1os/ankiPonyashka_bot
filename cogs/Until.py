@@ -3,12 +3,11 @@ from .module import REQ_database as Rdb
 import disnake
 from disnake.ext import commands
 import asyncio
-import discord
 import time
 from datetime import date
 
 db = Rdb.DataBase
-#! Основное тело селектора
+#! Основное тело селектора лидерборда
 # тело самой команды, что вызывает данный селектор на 63 строке
 class DropDownMenuLeader(disnake.ui.StringSelect):
     def __init__(self, map:map, user:int, time:float):
@@ -17,17 +16,17 @@ class DropDownMenuLeader(disnake.ui.StringSelect):
         self.user= user
         self.time= time
 
+        # disnake.SelectOption(label='Аркады', value='arcade', description='Сортировка по самому большому винстрику')
         options = [
             disnake.SelectOption(label='Опыт', value='exp', description='Сортировка по свободному опыту'),
             disnake.SelectOption(label='Валюта', value='money', description='Сортировка по валюте [1sl = 3200es, 1sh = 400es]'),
-            disnake.SelectOption(label='Аркады', value='arcade', description='Сортировка по самому большому винстрику'),
             disnake.SelectOption(label='Характиристикам', value='stat', description='Топ 1, по каждой характиристике')
             ]
         super().__init__(
             placeholder='Сортировка по...',
             min_values=1,
             max_values=1,
-            options=options,
+            options=options
             )
         
         if map is None:
@@ -41,10 +40,10 @@ class DropDownMenuLeader(disnake.ui.StringSelect):
             embed= self.map[0]
         elif self.values[0] == 'money':
             embed= self.map[1]
-        elif self.values[0] == 'arcade':
-            embed= self.map[2]
+        # elif self.values[0] == 'arcade':
+        #     embed= self.map[2]
         elif self.values[0] == 'stat':
-            embed= self.map[3]
+            embed= self.map[2]
 
 
         if self.time < time.time():
@@ -106,11 +105,51 @@ class DropDownMenuHelp(disnake.ui.StringSelect):
         else:
             await inter.response.edit_message(embed=embed)
 
-
 class DropDownViewHelp(disnake.ui.View):
     def __init__(self, map: map, user:int, time:float):
         super().__init__(timeout=None)
         self.add_item(DropDownMenuHelp(time, map, user, ))
+
+
+#! Модалка для таймера
+class Modal(disnake.ui.Modal):
+        def __init__(self, comp):
+            self.comp = comp
+            components = [
+                disnake.ui.TextInput(
+                    label='Причина',
+                    placeholder='Напишите причину по которой я (поняшка) вас позову.',
+                    custom_id='reason',
+                    style=disnake.TextInputStyle.paragraph
+                    )
+                ]
+            super().__init__(
+                title='Создание напоминания',
+                custom_id='modal',
+                components=components
+                )
+        async def callback(self, inter: disnake.ModalInteraction):
+            y = {}
+            for key, item in inter.text_values.items():
+                y[key] = item
+            await inter.response.send_message(f'Я вас позову!')
+            await Timer(user_id= self.comp[0], times=self.comp[1], bot= self.comp[2], message_context=y['reason'], channel=self.comp[3]).start()
+
+#! Таймер
+class Timer:
+    def __init__(self, user_id, times, channel, bot, message_context):
+        self.message_context = message_context
+        self.channel = channel
+        self.user_id = user_id
+        self.time= times
+        self.bot= bot
+
+    async def start(self):
+        await asyncio.sleep(self.time)
+        embed= disnake.Embed(description=self.message_context)
+        await self.bot.get_channel(self.channel).send(f'<@{self.user_id}> я вас зову, по вашей просьбе!', embed=embed)
+
+
 
 class Until(commands.Cog):
     def __init__(self, bot=commands.Bot):
@@ -139,7 +178,7 @@ class Until(commands.Cog):
         # Создание списка для вывода
         EmbedText = ''
         for index, item in enumerate(sortTopListE):
-            EmbedText += f'**``{index + 1}``** <@{item[0]}>\n|ㅤ**Уровень: {item[1][1]}**\n|ㅤ**опыт: {item[1][0]}**\n'
+            EmbedText += f'**``{index + 1}``** <@{item[0]}>\n|ㅤ**Уровень: {item[1][1]} ``({item[1][0]} exp)``**\n'
             if index == 9:
                 break
         # Плашка с итоговой информацией 
@@ -169,7 +208,7 @@ class Until(commands.Cog):
         # Создание списка для вывода
         EmbedText = ''
         for index, item in enumerate(sortTopListM):
-            EmbedText += f'**``{index + 1}``** <@{item[0]}>\n|ㅤ**Всего валюты:** **``{item[1][0]}``**\n|ㅤ[{item[1][1]}es] [{item[1][2]}sh] [{item[1][3]}sl] [{item[1][4]}cr]\n'
+            EmbedText += f'**``{index + 1}``** <@{item[0]}>\n|ㅤ**Ценность кошелька** **``({item[1][0]})``**\n'
             if index == 9:
                 break
         # Плашка с итоговой информацией 
@@ -186,33 +225,33 @@ class Until(commands.Cog):
 
         # !Создание списка топ 10 участников по винстрикам
         # Занесение в список всех заригистрированных участников
-        topListW = {}
-        for index, item in enumerate(usersW):
-            summ = item[1] + item[2] + item[3]
-            topListW[item[0]] = [item[1], item[2], item[3], summ]
-        # Сортировка занесенных в список участников
-        sortTopListW = sorted(topListW.items(), key= lambda items: items[1], reverse=True)
-        # Поиск места в топе автора вызова лидерборда
-        callAuthorW = None
-        for index, item in enumerate(sortTopListW):
-            if user == int(item[0]):
-                callAuthorW = index+1
-        # Создание списка для вывода
-        EmbedText = ''
-        for index, item in enumerate(sortTopListW):
-            EmbedText += f'**``{index + 1}``** <@{item[0]}>\n|ㅤ**Стриков:** **``{item[1][3]}``**\n|ㅤ[{item[1][0]}сn] [{item[1][1]}cs] [{item[1][2]}rr]\n'
-            if index == 9:
-                break
-        # Плашка с итоговой информацией 
-        embed_win = disnake.Embed(
-            title='**Топ лидеров по винстрикам** 💀', 
-            description=EmbedText
-            )
-        if not ctx.guild is None:
-            embed_win.set_thumbnail(url=ctx.guild.icon)
-            embed_win.set_footer(
-                text=f'Вы находитесь на {callAuthorW} месте по винстрикам', 
-                icon_url=ctx.message.author.avatar)
+        # topListW = {}
+        # for index, item in enumerate(usersW):
+        #     summ = item[1] + item[2] + item[3]
+        #     topListW[item[0]] = [item[1], item[2], item[3], summ]
+        # # Сортировка занесенных в список участников
+        # sortTopListW = sorted(topListW.items(), key= lambda items: items[1][3], reverse=True)
+        # # Поиск места в топе автора вызова лидерборда
+        # callAuthorW = None
+        # for index, item in enumerate(sortTopListW):
+        #     if user == int(item[0]):
+        #         callAuthorW = index+1
+        # # Создание списка для вывода
+        # EmbedText = ''
+        # for index, item in enumerate(sortTopListW):
+        #     EmbedText += f'**``{index + 1}``** <@{item[0]}>\n|ㅤ**Стриков:** **``{item[1][3]}``**\n|ㅤ[{item[1][0]}сn] [{item[1][1]}cs] [{item[1][2]}rr]\n'
+        #     if index == 9:
+        #         break
+        # # Плашка с итоговой информацией 
+        # embed_win = disnake.Embed(
+        #     title='**Топ лидеров по винстрикам** 💀', 
+        #     description=EmbedText
+        #     )
+        # if not ctx.guild is None:
+        #     embed_win.set_thumbnail(url=ctx.guild.icon)
+        #     embed_win.set_footer(
+        #         text=f'Вы находитесь на {callAuthorW} месте по винстрикам', 
+        #         icon_url=ctx.message.author.avatar)
         
         # !Создание списка топ 1, 10 топов по характиристика РПГ
         # 1. Здоровье(ХП) + Стойкость(DR)
@@ -231,12 +270,11 @@ class Until(commands.Cog):
             embed_rpg.set_footer(
                 text=f'Вы находитесь на {callAuthorRPG} месте по характиристикам', 
                 icon_url=ctx.message.author.avatar)
-        
+        # embed_win
         # Список таблиц
-        maps = [embed_exp, embed_money, embed_win, embed_rpg]
+        maps = [embed_exp, embed_money, embed_rpg]
         view = DropDownViewLeader(map=maps, user=user, time=time.time()+180)
         await ctx.send(embed=embed_exp, view=view)
-
 
     @commands.command(name='wait')
     async def wait(self, ctx):
@@ -261,7 +299,6 @@ class Until(commands.Cog):
         if msg:
             await channel.send(self.text)
     
-
     @commands.command(name='help', aliases=['хелп', 'помощь', 'команды'])
     async def help(self, ctx):
         
@@ -272,16 +309,14 @@ class Until(commands.Cog):
             title='Общая информация',
             description=
 '''
-```Данный бот был создан человеком, с никнеймом: "Поняшь"```
+```Данный бот создан пользователем @anki_ponyash(Поняшь) при поддержке @ksldi(Симба), @lesnyaa(Лесник) и многим другим пользователями```
 ```Он предназначен для единоличного использования сервером: "Зарато"```
-```Если вы заметили баги, неисправности или просто плохой баланс в одной из систем Поняшки, 
-то сообщите системному администратору "Поняшь" об этой неисправности```
 
 # Данный бот имеет:
 1. **Экономическую систему** 
 Данная система позволяет покупать разные диковинные вещи на сервере
 будь-то роль, право или проходка. Возможно будет нечто экслюзивное.
-Валюта, что является мерилом чата — ChatPoint (CP)
+Валюта, что является мерилом чата — ChatPoint (ChP)
 
 2. **Систему RPG** 
 Во многом система завязана на лоре и многих знаковых моментах сервера.
@@ -298,6 +333,7 @@ class Until(commands.Cog):
 (Понь все ищёт себе помощника, но увы пока достойного человека нет)
 
 ||Список команд будет пополняться||
+Для просмотра команд, используйте выпадающий список снизу.
 '''
             )
         #! Базовые команды
@@ -428,78 +464,25 @@ s - в конце означает «души (soul)»
 
         await ctx.send(embed=embed)
 
-    #! Таймер
-    class Timer:
-        def __init__(self, ctx, times, message, bot):
-            self.ctx= ctx
-            self.time= times
-            self.message= message
-            self.bot= bot
-        async def start(self):
-            await asyncio.sleep(self.time)
-            embed= disnake.Embed(title='Таймер закончил счет')
-            await self.message.edit(embed=embed)
-            await self.bot.get_channel(self.message.channel.id).send(f'<@{self.ctx.message.author.id}>')
-
-    @commands.command()
-    async def test(self, ctx):
-
-        timeValue= 30
+    @commands.slash_command(name='timer', description='Простая напоминалка. Указывать в минутах.' ,guild_ids=[1199488197885968515, 958063150144577558])
+    async def timer(self, inter: disnake.AppCmdInter, time:int):
+        if not inter.channel.id in [1205649033125830706, 992673176448417792]:
+            return
+        
+        timeValue= 60
         try:
-            timeValue= int(ctx.message.content.split(' ')[1])
+            timeValue = time * 60
         except:
-            embed= disnake.Embed(description='Указано не корректное значение')
-            return await ctx.send(embed=embed)
-        if timeValue > 180:
-            return await ctx.send('Пока не больше 3-х минут')
-        embed= disnake.Embed(title=f'{timeValue} секунд')
-        self.user= ctx.message.author.id
-        message = await ctx.send(embed=embed)
+            pass
+        embed= disnake.Embed(title=f'Через {timeValue} я вас позову.')
+        user_id = inter.author.id
 
-        await self.Timer(ctx= ctx, times=timeValue, message=message, bot= self.bot).start()
+        comp = [user_id, timeValue, self.bot, inter.channel.id]
+        await inter.response.send_modal(modal=Modal(comp=comp))
 
-    #! Прослушка
-    @commands.Cog.listener('on_button_click')
-    async def test2_listener(self, inter: disnake.MessageInteraction):
-        if inter.component.custom_id not in ['accpt', 'cannel']:
-            return
-        if inter.author.id in self.say:
-            await inter.response.send_message('Вы уже проголосовали', ephemeral=True)
-            return
-        if inter.author.id not in self.ment:
-            await inter.response.send_message('Вы не можете участвовать в данном опросе', ephemeral=True)
-            return
-        
-        if inter.component.custom_id == 'accpt':
-            self.index_acpt+= 1
-            self.say.append(inter.author.id)
-            self.ment.remove(inter.author.id)
-            embed= disnake.Embed(title='Голосование', description=f'за: {self.index_acpt}\nпротив: {self.index_cann}')
-        elif inter.component.custom_id == 'cannel':
-            self.index_cann+= 1
-            self.say.append(inter.author.id)
-            self.ment.remove(inter.author.id)
-            embed= disnake.Embed(title='Голосование', description=f'за: {self.index_acpt}\nпротив: {self.index_cann}')
-        if not self.ment:
-            embed= disnake.Embed(title='Голосование', description=f'за: {self.index_acpt}\nпротив: {self.index_cann}')
-            await inter.response.edit_message(embed=embed, components=None)
-        await inter.response.edit_message(embed=embed)
-       
-    @commands.command()
-    async def test2(self, ctx):
-
-        self.ment= ctx.message.raw_mentions
-        self.index_acpt= 0
-        self.index_cann= 0
-        self.say= []
-
-        buttons= [
-            disnake.ui.Button(style=disnake.ButtonStyle.green, label='Принять', custom_id='accpt'),
-            disnake.ui.Button(style=disnake.ButtonStyle.danger, label='Отклонить', custom_id='cannel')
-            ]
-        
-        embed= disnake.Embed(title='Голосование', description=f'за: {self.index_acpt}\nпротив: {self.index_cann}')
-        await ctx.send(embed=embed, components= buttons)
+    @commands.slash_command(name='test', description='testing other pump', guild_ids=[1199488197885968515])
+    async def t(self, inter: disnake.AppCmdInter, num:int):
+        await inter.response.send_message(num)
 
 # Загрузка кога в основное ядро по команде
 def setup(bot:commands.Bot): 

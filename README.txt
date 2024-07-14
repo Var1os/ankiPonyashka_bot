@@ -1,12 +1,3 @@
-custom id
-1-199 — выделено под меню выбора
-# Записывать id всех компонентов
-id:1 — селектор для лидерборда
-
-200-399 — выделено под модульные окна
-# Записывать id всех модульных окон
-
-Иметь документацию по боту
-Контактная информация
-Краткие хар-ки ПО
-Дополнительные упоминания и предупреждения
+Just a bot, for once server where she work.
+Pony can speak another language, so he write comments on russian. Use translate for learn this. Sorry.
+But pony will fix it. Pony hope... ._.

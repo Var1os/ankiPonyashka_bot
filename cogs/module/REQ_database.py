@@ -2,7 +2,9 @@ import sqlite3
 import time
 
 con = sqlite3.connect('../bots/database.db')
+conRPG = sqlite3.connect('../bots/RPG_base.db')
 cur = con.cursor()
+curRPG = con.cursor()
 
 # DataBase.Check(user_id=9000).user()
 
@@ -24,11 +26,14 @@ class DataBase:
             if cur.fetchone() is None:
                 num+= 1
                 cur.execute("INSERT INTO money VALUES (?, ?, ?, ?, ?, ?)", (self.user_id, self.user_name, 0, 0, 0, 0))
+
+            #! Потом включить проверку на данный показатель
             # РПГ статы
-            cur.execute(f'SELECT uid FROM rpg_stat WHERE uid = {self.user_id}')
-            if cur.fetchone() is None:
-                num+= 1
-                cur.execute("INSERT INTO rpg_stat VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (self.user_id, 10, 1, 1, 1, 0, 50, 5, 1, 1, ''))
+            # curRPG.execute(f'SELECT uid FROM rpg_stat WHERE uid = {self.user_id}')
+            # if curRPG.fetchone() is None:
+            #     num+= 1
+            #     curRPG.execute("INSERT INTO rpg_stat VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (self.user_id, 10, 1, 1, 1, 0, 50, 5, 1, 1, ''))
+
             # Динамические победы юзера
             cur.execute(f'SELECT uid FROM user_wins WHERE uid = {self.user_id}')
             if cur.fetchone() is None:
@@ -47,7 +52,7 @@ class DataBase:
 
             con.commit()
             if num!= 0:
-                print(f'Create new record {self.user_id}')
+                print(f'Create new record {self.user_id} / None poss: {num} / userName > {self.user_name}')
                 return False
             return True
         def bot(self):
@@ -216,10 +221,6 @@ class DataBase:
         
         def user(self):
             cur.execute(f'SELECT * FROM user WHERE uid = {self.user_id}')
-            return cur.fetchone()
-        
-        def system(self):
-            cur.execute(f'SELECT * FROM rpg_stat WHERE uid = {self.user_id}')
             return cur.fetchone()
         
         def money(self):
@@ -431,4 +432,10 @@ class DataBase:
         def delete(self):
             pass
         def check(self):
+            pass
+    class DeleteData:
+        def __init__(self, id:int):
+            self.id = id
+        
+        def delete(self):
             pass

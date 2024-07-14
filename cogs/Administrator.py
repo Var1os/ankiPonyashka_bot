@@ -80,15 +80,12 @@ class Admin(commands.Cog):
         user = ctx.message.author.id
         content = ctx.message.content
         mentioned = ctx.message.raw_mentions
-
         simbol = ',.!?'
-
         # Удаление лишних символов
         for item in simbol:
             content.replace(item, '')
         else:
             content = content.split(' ')
-        
         # проверка на правильность числа для применения
         try:
             count = str(content[1])
@@ -99,7 +96,6 @@ class Admin(commands.Cog):
                 operation = 'minus'
             else:
                 operation = 'update'
-
             count = abs(int(content[1]))
         except:
             embed = disnake.Embed(title='Неверное значение', description='~exp ``(value)`` [mentioned]\nㅤㅤㅤㅤㅤ^^^^^^^^')
@@ -133,7 +129,7 @@ class Admin(commands.Cog):
     #! Написать команду для изменения денег
     @commands.command(name='m')
     @commands.has_permissions(administrator=True)
-    async def m(self, ctx):
+    async def money(self, ctx):
         pass
     
     @commands.command(name='mute')

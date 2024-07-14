@@ -84,7 +84,7 @@ class Economycs(commands.Cog):
 
         baseStat = db.Info(user_id= self.user).user()
         moneyStat = db.Info(user_id= self.user).money()
-        rpgStat = db.Info(user_id= self.user).system()
+        # rpgStat = db.Info(user_id= self.user).system()
         wins_str = db.Info(user_id=self.user).any_table(table='user_wins_max')
 
         # Эмбиенд основного табла

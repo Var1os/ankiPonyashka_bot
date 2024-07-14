@@ -117,21 +117,23 @@ class Fun(commands.Cog):
             db.Fun(user=user, strick='rolete').add()
             db.Fun(user=user).maxis()
             embed = disnake.Embed(
-                description=f'**Выстрела не было. Поздравляю** 🎉\nПуль: {bullet}\nWinSrick: ``{strick[3]+1}``',
+                title=f'**Выстрела не было. \nПоздравляю** 🎉',
                 color= disnake.Colour.green())
+            embed.set_footer(text=f'WinSrick: {strick[3]+1}')
             return await ctx.send(embed=embed)
         else:
             db.Fun(user=user, strick='rolete').clear()
             embed = disnake.Embed(
-                description=f'**Ты проиграл этой жизни** 💀\nПуль: {bullet}\nWinSrick: ``0``',
+                title=f'**Ты проиграл этой жизни** 💀',
                 color= disnake.Colour.red())
+            embed.set_footer(text='WinSrick: 0')
             return await ctx.send(embed=embed)
 
     @commands.command(name='coin', aliases=['монетка', 'монеточка', 'коин'])
     async def coin(self, ctx):
 
         user = ctx.message.author.id
-        db.Check(user_id=user, user_name=ctx.messsage.author.name).user()
+        db.Check(user_id=user, user_name=ctx.message.author.name).user()
 
         try:
             mess = ctx.message.content.split(' ')[1]

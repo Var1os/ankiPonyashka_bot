@@ -15,5 +15,6 @@ bot.load_extension('cogs.Rpg')
 bot.load_extension('cogs.Administrator')
 bot.load_extension('cogs.Until')
 bot.load_extension('cogs.EmotionalPony')
+bot.load_extension('cogs.TestingEver')
 
 bot.run(open("token.txt", 'r').readline())  
