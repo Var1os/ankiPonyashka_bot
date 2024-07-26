@@ -51,7 +51,7 @@ class Fun(commands.Cog):
 
     @commands.command(name='gif', aliases=['гиф', 'гифка'])
     async def gif(self, ctx):
-        file = open('../bots/content/Gif/base.txt', mode='r')
+        file = open('../bots/other_content/Gif/base.txt', mode='r')
 
         gifs = []
         for item in file:
@@ -62,7 +62,7 @@ class Fun(commands.Cog):
 
     @commands.command(name='gifadd', aliases=['добгиф', 'новгиф'])
     async def gifadd(self, ctx):
-        file = open('../bots/content/Gif/base.txt', mode='r')
+        file = open('../bots/other_content/Gif/base.txt', mode='r')
 
         try:
             gifs_user = ctx.message.content.split(' ')[1]
@@ -91,7 +91,6 @@ class Fun(commands.Cog):
     async def russianRollete(self, ctx):
 
         user = ctx.message.author.id
-        db.Check(user_id=user, user_name=ctx.message.author.name).user()
 
         # Проверка на указание числового значения
         try:
@@ -133,7 +132,6 @@ class Fun(commands.Cog):
     async def coin(self, ctx):
 
         user = ctx.message.author.id
-        db.Check(user_id=user, user_name=ctx.message.author.name).user()
 
         try:
             mess = ctx.message.content.split(' ')[1]

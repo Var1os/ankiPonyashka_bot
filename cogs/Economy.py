@@ -17,7 +17,6 @@ class Economycs(commands.Cog):
     async def work(self, ctx):
 
         user = ctx.message.author.id
-        db.Check(user_id= user, user_name=ctx.message.author.name).user()
         
         if db.Money(user= user).checkTimeLock():
 
@@ -79,7 +78,6 @@ class Economycs(commands.Cog):
     async def stat(self, ctx):
 
         self.user = ctx.message.author.id
-        db.Check(user_id= self.user, user_name=ctx.message.author.name).user()
         db.Fun(user=self.user).maxis()
 
         baseStat = db.Info(user_id= self.user).user()
@@ -172,7 +170,6 @@ class Economycs(commands.Cog):
     async def tran(self, ctx):
 
         self.user = ctx.message.author.id
-        db.Check(user_id=self.user, user_name=ctx.message.author.name).user()
         
         # Проверка на наличие количества передаваемой валюты
         try:
@@ -320,7 +317,6 @@ class Economycs(commands.Cog):
     async def crafts(self, ctx):
 
         self.user = ctx.message.author.id
-        db.Check(user_id=self.user, user_name=ctx.message.author.name).user()
 
         # Проверка на наличия числового значения
         try:

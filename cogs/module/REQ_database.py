@@ -2,7 +2,7 @@ import sqlite3
 import time
 
 con = sqlite3.connect('../bots/database.db')
-conRPG = sqlite3.connect('../bots/RPG_base.db')
+conRPG = sqlite3.connect('../bots/RPG_DataBase.db')
 cur = con.cursor()
 curRPG = con.cursor()
 
@@ -16,11 +16,15 @@ class DataBase:
             self.user_name= user_name
         def user(self):
             num= 0
+
+
+
             # Основная таблица юзера
-            cur.execute(f'SELECT * FROM user WHERE uid = {self.user_id}')
+            cur.execute(f'SELECT * FROM user_ment WHERE uid = {self.user_id}')
             if cur.fetchone() is None:
                 num+= 1
                 cur.execute("INSERT INTO user VALUES (?, ?, ?, ?, ?, ?, ?)", (self.user_id, self.user_name, 0, 0, 500, 0, 0))
+
             # Таблица денег
             cur.execute(f'SELECT uid FROM money WHERE uid = {self.user_id}')
             if cur.fetchone() is None:
@@ -32,7 +36,7 @@ class DataBase:
             # curRPG.execute(f'SELECT uid FROM rpg_stat WHERE uid = {self.user_id}')
             # if curRPG.fetchone() is None:
             #     num+= 1
-            #     curRPG.execute("INSERT INTO rpg_stat VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (self.user_id, 10, 1, 1, 1, 0, 50, 5, 1, 1, ''))
+            #     curRPG.execute("INSERT INTO rpg_stat VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", self.user_id, 10, 1, 1, 1, 0, 50, 5, 1, 1, '')
 
             # Динамические победы юзера
             cur.execute(f'SELECT uid FROM user_wins WHERE uid = {self.user_id}')
@@ -55,6 +59,7 @@ class DataBase:
                 print(f'Create new record {self.user_id} / None poss: {num} / userName > {self.user_name}')
                 return False
             return True
+        
         def bot(self):
             checkValue = cur.execute('SELECT * FROM bot')
             if checkValue is None:
@@ -219,23 +224,23 @@ class DataBase:
         def __init__(self, user_id= None):
             self.user_id= user_id
         
-        def user(self):
+        def user(self) -> tuple:
             cur.execute(f'SELECT * FROM user WHERE uid = {self.user_id}')
             return cur.fetchone()
         
-        def money(self):
+        def money(self) -> tuple:
             cur.execute(f'SELECT * FROM money WHERE uid = {self.user_id}')
             return cur.fetchone()
         
-        def any_table(self, table: str):
+        def any_table(self, table: str) -> tuple:
             cur.execute(f'SELECT * FROM {table} WHERE uid = {self.user_id}')
             return cur.fetchone()
 
-        def all(self, table: str):
+        def all(self, table: str) -> tuple:
             cur.execute(f'SELECT * FROM {table}')
             return cur.fetchall()
 
-        def whatIsLvl(self, exp=0):
+        def whatIsLvl(self, exp=0) -> int:
             cur.execute(f"SELECT max(lvl) FROM levels WHERE expTotal - {exp} <= 0")
             res = cur.fetchone()
             if res[0] is None: 
@@ -305,6 +310,7 @@ class DataBase:
             cur.execute(f'UPDATE user SET MentTimer = {times} WHERE uid = {self.user_id}')
             con.commit()
             return True
+
 
     class BotMood:
         def __init__(self, user: int= None):
@@ -418,21 +424,8 @@ class DataBase:
             for i in range(len(max_str)):
                 if max_str[i] < user_str[i]:
                     cur.execute(f'UPDATE user_wins_max SET {ls[i]} = {user_str[i]} WHERE uid = {self.user}')
-    class Moderation:
-        def __init__(self, id: int, value: int= None):
-            self.id= id
-            self.value= value
-        
-        def add(self):
-            pass
-        def sub(self):
-            pass
-        def set(self):
-            pass
-        def delete(self):
-            pass
-        def check(self):
-            pass
+    
+    
     class DeleteData:
         def __init__(self, id:int):
             self.id = id

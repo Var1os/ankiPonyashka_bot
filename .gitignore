@@ -1,8 +1,10 @@
 token.txt
-testing.py
-content/
-acesses/
+-apps-/
 config/
+content/
+other_content/
+react_text/
+acesses/
 
-database.db
-RPG_base.db
+_rpg.db
+_system.db

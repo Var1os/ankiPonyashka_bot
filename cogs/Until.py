@@ -438,31 +438,6 @@ s - в конце означает «души (soul)»
         view = DropDownViewHelp(map=maps, user=user, time=time.time()+1200)
         await ctx.send(embed=embed_main, view=view)
 
-    @commands.command(name='date', aliases=['дата', 'праздники', 'дедлайны'])
-    async def date(self, ctx):
-        
-        dates = {
-            
-            '130' : [date(2001, 5, 9),'День победы'],
-            '153' : [(2001, 6, 1), 'Первый день лета'],
-            '164' : [(2001, 6, 12), 'День России']
-            
-            }
-
-        dateNow = time.strftime('%j', time.gmtime(time.time()))
-        dateList = ['Пока пусто']
-        dateSTR = ''
-
-        for index, item in enumerate(dateList):
-            dateSTR += f'{index+1} : {item}\n'
-
-        embed = disnake.Embed(
-            title='Ближайшие знаковые даты',
-            description=dateSTR,
-            )
-        embed.set_footer(text=f'День года: {dateNow} / 365')
-
-        await ctx.send(embed=embed)
 
     @commands.slash_command(name='timer', description='Простая напоминалка. Указывать в минутах.' ,guild_ids=[1199488197885968515, 958063150144577558])
     async def timer(self, inter: disnake.AppCmdInter, time:int):
@@ -480,9 +455,33 @@ s - в конце означает «души (soul)»
         comp = [user_id, timeValue, self.bot, inter.channel.id]
         await inter.response.send_modal(modal=Modal(comp=comp))
 
-    @commands.slash_command(name='test', description='testing other pump', guild_ids=[1199488197885968515])
-    async def t(self, inter: disnake.AppCmdInter, num:int):
-        await inter.response.send_message(num)
+
+    @commands.command(name='avatar',  aliases=['ava', 'a', 'ава', 'аватар'])
+    async def avatar(self, ctx):
+        
+        if ctx.message.raw_mentions:
+            mentioned = ctx.guild.get_member(ctx.message.raw_mentions[0])
+            embed = disnake.Embed(title=f'Аватар пользователя: {mentioned.name}')
+            embed.set_image(mentioned.avatar)
+            await ctx.send(embed=embed)
+            return
+        embed = disnake.Embed(title=f'Аватар пользователя: {ctx.message.author.name}')
+        embed.set_image(ctx.message.author.avatar)
+        await ctx.send(embed=embed)
+    
+
+    @commands.command()
+    async def lavatar(self, ctx):
+        import requests
+
+        raw = ctx.guild.get_member(ctx.message.raw_mentions[0])
+        avatar = raw.avatar
+        responce = requests.get(url=avatar)
+        with open(f'../bots/content/avatar/{raw.id}.png', 'wb') as file:
+            file.write(responce.content)
+            file.close()
+
+        await ctx.send(f'/ all ok')
 
 # Загрузка кога в основное ядро по команде
 def setup(bot:commands.Bot): 
