@@ -1,5 +1,4 @@
 from .module import REQ_database as Rdb
-from .module.Slicer import PagReact as pag
 
 import random
 import time
@@ -175,4 +174,3 @@ class Fun(commands.Cog):
 # Загрузка кога в основное ядро по команде
 def setup(bot:commands.Bot):
     bot.add_cog(Fun(bot))
-    print(f'Запуск модуля FUN.system')

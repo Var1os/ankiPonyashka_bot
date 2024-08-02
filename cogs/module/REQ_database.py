@@ -1,11 +1,17 @@
+import disnake
+from disnake.ext import commands
+
 import sqlite3
 import time
 
-con = sqlite3.connect('../bots/database.db')
-conRPG = sqlite3.connect('../bots/RPG_DataBase.db')
+con = sqlite3.connect('../bots/_system.db')
+conRPG = sqlite3.connect('../bots/_rpg.db')
 cur = con.cursor()
-curRPG = con.cursor()
+curRPG = conRPG.cursor()
 
+class Db(commands.Cog):
+    def __init__(self, bot:commands.Bot):
+        self.bot = bot
 # DataBase.Check(user_id=9000).user()
 
 class DataBase:
@@ -13,256 +19,149 @@ class DataBase:
         # Передать id пользователя
         def __init__(self, user_id = None, user_name:str = None):
             self.user_id= user_id
-            self.user_name= user_name
         def user(self):
             num= 0
-
-
-
-            # Основная таблица юзера
+            #! Основная таблица юзера в таблицах системы и не РПГ модуле
             cur.execute(f'SELECT * FROM user_ment WHERE uid = {self.user_id}')
             if cur.fetchone() is None:
                 num+= 1
-                cur.execute("INSERT INTO user VALUES (?, ?, ?, ?, ?, ?, ?)", (self.user_id, self.user_name, 0, 0, 500, 0, 0))
-
-            # Таблица денег
-            cur.execute(f'SELECT uid FROM money WHERE uid = {self.user_id}')
-            if cur.fetchone() is None:
-                num+= 1
-                cur.execute("INSERT INTO money VALUES (?, ?, ?, ?, ?, ?)", (self.user_id, self.user_name, 0, 0, 0, 0))
-
-            #! Потом включить проверку на данный показатель
-            # РПГ статы
-            # curRPG.execute(f'SELECT uid FROM rpg_stat WHERE uid = {self.user_id}')
-            # if curRPG.fetchone() is None:
-            #     num+= 1
-            #     curRPG.execute("INSERT INTO rpg_stat VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", self.user_id, 10, 1, 1, 1, 0, 50, 5, 1, 1, '')
-
-            # Динамические победы юзера
+                cur.execute("INSERT INTO user_ment VALUES (?, ?, ?)", (self.user_id, 0, 0))
             cur.execute(f'SELECT uid FROM user_wins WHERE uid = {self.user_id}')
             if cur.fetchone() is None:
                 num+= 1
                 cur.execute("INSERT INTO user_wins VALUES (?, ?, ?, ?)", (self.user_id, 0, 0, 0))
-            # Блокировки
-            cur.execute(f'SELECT uid FROM lock WHERE uid = {self.user_id}')
-            if cur.fetchone() is None:
-                num+= 1
-                cur.execute("INSERT INTO lock VALUES (?, ?, ?, ?)", (self.user_id, 0, 0, 0))
-            # Максимальные стрики выигрышей
             cur.execute(f'SELECT uid FROM user_wins_max WHERE uid = {self.user_id}')
             if cur.fetchone() is None:
                 num+= 1
                 cur.execute("INSERT INTO user_wins_max VALUES (?, ?, ?, ?)", (self.user_id, 0, 0, 0))
 
+
+            #? RPG module
+            curRPG.execute(f'SELECT * FROM user_active_inventory WHERE UID = {self.user_id}')
+            if curRPG.fetchone() is None:
+                num+=1
+                curRPG.execute("INSERT INTO user_active_inventory VALUES (?, ?, ?, ?, ?, ?)", (self.user_id, 0, 0, 0, 0, 0))
+            curRPG.execute(f'SELECT * FROM user_diplomaty WHERE UID = {self.user_id}')
+            if curRPG.fetchone() is None:
+                num+=1
+                curRPG.execute("INSERT INTO user_diplomaty VALUES (?,?,?,?,?,?,?,?,?)", (self.user_id,0,0,0,0,0,0,0,0))
+            curRPG.execute(f'SELECT * FROM user_equipment WHERE UID = {self.user_id}')
+            if curRPG.fetchone() is None:
+                num+=1
+                curRPG.execute("INSERT INTO user_equipment VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (self.user_id,0,0,0,0,0,0,0,0,0,0,0,0,0))
+            curRPG.execute(f"SELECT * FROM user_main_info WHERE UID = {self.user_id}")
+            if curRPG.fetchone() is None:
+                num+=1
+                curRPG.execute("INSERT INTO user_main_info VALUES (?,?,?,?)", (self.user_id,0,0,0))
+            curRPG.execute(f"SELECT * FROM user_money WHERE UID = {self.user_id}")
+            if curRPG.fetchone() is None:
+                num+=1
+                curRPG.execute('INSERT INTO user_money VALUES (?,?,?,?,?,?,?,?,?)', (self.user_id,0,0,0,0,0,0,0,0))
+            curRPG.execute(f"SELECT * FROM user_parametr WHERE UID = {self.user_id}")
+            if curRPG.fetchone() is None:
+                num+=1
+                curRPG.execute('INSERT INTO user_parametr VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)', (self.user_id,10,5,1,1,1,25,10,0,10,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0))
+            curRPG.execute(f'SELECT * FROM user_blocktime WHERE UID = {self.user_id}')
+            if curRPG.fetchone() is None:
+                num+=1
+                curRPG.execute('INSERT INTO user_blocktime VALUES (?,?,?,?,?,?)', (self.user_id,0,0,0,0,0))
+            curRPG.execute(f'SELECT * FROM user_terms WHERE UID = {self.user_id}')
+            if curRPG.fetchone() is None:
+                num+=1
+                curRPG.execute('INSERT INTO user_terms VALUES (?,?,?,?)', (self.user_id,False,0,True))
+
+            conRPG.commit()
             con.commit()
             if num!= 0:
-                print(f'Create new record {self.user_id} / None poss: {num} / userName > {self.user_name}')
+                print(f'Create new record {self.user_id} / None poss: {num}')
                 return False
             return True
         
         def bot(self):
-            checkValue = cur.execute('SELECT * FROM bot')
-            if checkValue is None:
+            cur.execute('SELECT * FROM bot')
+            if cur.fetchone() is None:
                 cur.execute("INSERT INTO bot VALUES (?, ?, ?, ?)", (0, 0, 0, 0))
                 con.commit()
                 return True
             else:
                 return False
-        def level(self):
-            pass
-        #! проверка актуальности уровня чувачка  
+            
     class Money:
         # Передать id пользователя по которому и будут совершаться дальнейшие операции
-        def __init__(self, *, user: int, currency= 'essence', value= 0):
+        def __init__(self, *, user: int, currency= 'ESSENCE', value= 0):
             self.user= user
             self.currency= currency
             self.value= value
 
         # essence, shard, soul, cristall
-        def add(self):
-            if self.currency == 'essence':
-                cur.execute(f'UPDATE money SET essence_soul = essence_soul + {self.value} WHERE uid = {self.user}')
-            elif self.currency == 'shard':
-                cur.execute(f'UPDATE money SET shard_soul = shard_soul + {self.value} WHERE uid = {self.user}')
-            elif self.currency == 'soul':
-                cur.execute(f'UPDATE money SET soul = soul + {self.value} WHERE uid = {self.user}')
-            elif self.currency == 'cristall':
-                cur.execute(f'UPDATE money SET cristal_soul = cristal_soul + {self.value} WHERE uid = {self.user}')
-            else:
-                return False
-            con.commit()
+        def add(self) -> bool:
+            if self.currency in ["ESSENCE", "SHARD", "SOUL", "CRISTAL_SOUL", "COU", "VCOIN", "ACOIN", "TCOIN"]:
+                curRPG.execute(f'UPDATE user_money SET {self.currency} = {self.currency} + {self.value} WHERE UID = {self.user}')
+            else: return False
+            
+            conRPG.commit()
+            return True
+        def sub(self) -> bool:
+            if self.currency in ["ESSENCE", "SHARD", "SOUL", "CRISTAL_SOUL", "COU", "VCOIN", "ACOIN", "TCOIN"]:
+                cur.execute(f'SELECT {self.currency} FROM user_money WHERE UID = {self.user}')
+                if curRPG.fetchone()[0] - self.value < 0: 
+                    cur.execute(f'UPDATE user_money SET {self.currency} = {self.currency} - {self.value} WHERE UID = {self.user}')
+                else: return False
+            else: return False
 
-        def sub(self):
-            if self.currency == 'essence':
-                cur.execute(f'SELECT essence_soul FROM money WHERE uid = {self.user}')
-                data = cur.fetchone()[0]
-                if 0 <= data - self.value:
-                    cur.execute(f'UPDATE money SET essence_soul = essence_soul - {self.value} WHERE uid = {self.user}')
-                else:
-                    return False
-            elif self.currency == 'shard':
-                cur.execute(f'SELECT shard_soul FROM money WHERE uid = {self.user}')
-                data = cur.fetchone()[0]
-                if 0 <= data - self.value:
-                    cur.execute(f'UPDATE money SET shard_soul = shard_soul - {self.value} WHERE uid = {self.user}')
-                else:
-                    return False
-            elif self.currency == 'soul':
-                cur.execute(f'SELECT soul FROM money WHERE uid = {self.user}')
-                data = cur.fetchone()[0]
-                if 0 <= data - self.value:
-                    cur.execute(f'UPDATE money SET soul = soul - {self.value} WHERE uid = {self.user}')
-                else:
-                    return False
-            elif self.currency == 'cristall':
-                cur.execute(f'SELECT cristal_soul FROM money WHERE uid = {self.user}')
-                data = cur.fetchone()[0]
-                if 0 <= data - self.value:
-                    cur.execute(f'UPDATE money SET cristal_soul = cristal_soul - {self.value} WHERE uid = {self.user}')
-                else:
-                    return False
-            else:
-                return False
+            con.commit()
+            return True
+        def update(self) -> bool:
+            if self.currency in ["ESSENCE", "SHARD", "SOUL", "CRISTAL_SOUL", "COU", "VCOIN", "ACOIN", "TCOIN"]:
+                cur.execute(f'UPDATE user_money SET {self.currency} = {self.value} WHERE UID = {self.user_id}')
+            else: return False
             con.commit()
             return True
         
-        def update(self):
-            if self.currency == 'essence':
-                cur.execute(f'UPDATE money SET essence_soul = {self.value} WHERE uid = {self.user_id}')
-            elif self.currency == 'shard':
-                cur.execute(f'UPDATE money SET shard_soul = {self.value} WHERE uid = {self.user_id}')
-            elif self.currency == 'soul':
-                cur.execute(f'UPDATE money SET soul = {self.value} WHERE uid = {self.user_id}')
-            elif self.currency == 'cristall':
-                cur.execute(f'UPDATE money SET cristal_soul = {self.value} WHERE uid = {self.user_id}')
-            else:
-                return False
-            con.commit()
-            return True
-        
-        def have(self):
-            cur.execute(f'SELECT {self.currency} FROM money WHERE uid = {self.user}')
+        def have(self) -> tuple:
+            cur.execute(f'SELECT {self.currency} FROM user_money WHERE UID = {self.user}')
             return cur.fetchone()[0]
-
-        def lock(self, *, valueLock= 0, lockLvl= None):
-            data = round(time.time() + valueLock)
-            if lockLvl == 'low':
-                cur.execute(f'UPDATE lock SET soul_tmlock_lvl1 = {data} WHERE uid = {self.user}')
-            elif lockLvl == 'half':
-                cur.execute(f'UPDATE lock SET soul_tmlock_lvl2 = {data} WHERE uid = {self.user}')
-            elif lockLvl == 'high':
-                cur.execute(f'UPDATE lock SET soul_tmlock_lvl3 = {data} WHERE uid = {self.user}')
-            con.commit()
-            return True
         
-        def checkTimeLock(self, lockLvl= 'low'):
-            if lockLvl == 'low':
-                cur.execute(f'SELECT soul_tmlock_lvl1 FROM lock WHERE uid = {self.user}')
-                timeLock = cur.fetchone()[0]
-                if timeLock < round(time.time()):
-                    return True
-                elif timeLock is None:
-                    return False
-                else:
-                    return False
-            elif lockLvl == 'half':
-                cur.execute(f'SELECT soul_tmlock_lvl2 FROM lock WHERE uid = {self.user}')
-                timeLock = cur.fetchone()[0]
-                if timeLock < round(time.time()):
-                    return True
-                elif timeLock is None:
-                    return False
-                else:
-                    return False
-            elif lockLvl == 'high':
-                cur.execute(f'SELECT soul_tmlock_lvl3 FROM lock WHERE uid = {self.user}')
-                timeLock = cur.fetchone()[0]
-                if timeLock < round(time.time()):
-                    return True
-                elif timeLock is None:
-                    return False
-                else:
-                    return False
-            return False
-
-        def lockTake(self, lockLvl= 'low'):
-            if lockLvl == 'low':
-                cur.execute(f'SELECT soul_tmlock_lvl1 FROM lock WHERE uid = {self.user}')
-                return cur.fetchone()[0]
-            elif lockLvl == 'half':
-                cur.execute(f'SELECT soul_tmlock_lvl2 FROM lock WHERE uid = {self.user}')
-                return cur.fetchone()[0]
-            elif lockLvl == 'high':
-                cur.execute(f'SELECT soul_tmlock_lvl3 FROM lock WHERE uid = {self.user}')
-                return cur.fetchone()[0]
-            return False
-    class Exp:
-        def __init__(self, user: int, value= 0):
-            self.user= user
-            self.value= value
-
-        def add(self):
-            cur.execute(f'UPDATE user SET exp = exp + {self.value} WHERE uid = {self.user}')
-            con.commit()
-            return True
-
-        def sub(self):
-            cur.execute(f'SELECT exp FROM user WHERE uid = {self.user}')
-            data = cur.fetchone()[0]
-            if 0 <= data - self.value:
-                cur.execute(f'UPDATE user SET exp = exp - {self.value} WHERE uid = {self.user}')
-            else:
-                return False
-            con.commit()
-            return True
-        
-        def update(self):
-            cur.execute(f'UPDATE user SET exp = {self.value} WHERE uid = {self.user}')
-            con.commit()
-            return True
     class Info:
         def __init__(self, user_id= None):
             self.user_id= user_id
+        def takeFromRPG(self, table:str) -> tuple:
+            if self.user_id is None:
+                curRPG.execute(f'SELECT * FROM {table}')
+                return curRPG.fetchall()
+            curRPG.execute(f'SELECT * FROM {table} WHERE UID = {self.user_id}')
+            return curRPG.fetchone()    
         
-        def user(self) -> tuple:
-            cur.execute(f'SELECT * FROM user WHERE uid = {self.user_id}')
-            return cur.fetchone()
-        
-        def money(self) -> tuple:
-            cur.execute(f'SELECT * FROM money WHERE uid = {self.user_id}')
-            return cur.fetchone()
-        
-        def any_table(self, table: str) -> tuple:
-            cur.execute(f'SELECT * FROM {table} WHERE uid = {self.user_id}')
+        def takeFromSystem(self, table:str) -> tuple:
+            if self.user_id is None:
+                cur.execute(f'SELECT * FROM {table}')
+                return cur.fetchall()
+            cur.execute(f'SELECT * FROM {table} WHERE UID = {self.user_id}')
             return cur.fetchone()
 
-        def all(self, table: str) -> tuple:
-            cur.execute(f'SELECT * FROM {table}')
-            return cur.fetchall()
-
-        def whatIsLvl(self, exp=0) -> int:
-            cur.execute(f"SELECT max(lvl) FROM levels WHERE expTotal - {exp} <= 0")
-            res = cur.fetchone()
-            if res[0] is None: 
+        def positionLVL(self, exp:int):
+            curRPG.execute(f'SELECT lvl FROM levels WHERE expTotal - {exp} <= 0')
+            lvl = curRPG.fetchone()
+            if lvl is None:
                 return 0
-            return res[0]
+            return lvl[0]
+        def user(self):
+            cur.execute(f'SELECT * FROM user_ment WHERE uid = {self.user_id}')
+            return cur.fetchone()
+
     class Bot:
         def __init__(self, value=0):
             self.value = value
         
-        def lock(self):
-            data = round(time.time() + self.value)
-            cur.execute(f'UPDATE bot SET lock_tmreact = {data}')
+        def lock(self) -> bool:
+            cur.execute(f'UPDATE bot SET lock_tmreact = {round(time.time() + self.value)}')
             con.commit()
             return True
 
-        def checkLock(self):
-            data = round(time.time())
+        def checkLock(self) -> bool:
             cur.execute(f'SELECT lock_tmreact FROM bot')
-            if data > cur.fetchone()[0]:
-                return False
-            else:
-                return True
+            if round(time.time()) > cur.fetchone()[0]: return False
+            else: return True
         
         def info(self):
             cur.execute('SELECT * FROM bot')
@@ -280,10 +179,11 @@ class DataBase:
                 cur.execute(f'UPDATE bot SET {self.column} = {self.column} - {self.value}')
                 con.commit()
                 return True
-            def set(self):
+            def update(self):
                 cur.execute(f'UPDATE bot SET {self.column} = {self.value}')
                 con.commit()
                 return True
+            
     class User:
         def __init__(self, column=None, user_id=None, value=0):
             self.user_id = user_id
@@ -291,87 +191,26 @@ class DataBase:
             self.column = column
 
         def setParam(self):
-            cur.execute(f'UPDATE user SET {self.column} = {self.value} WHERE uid = {self.user_id}')
+            curRPG.execute(f'UPDATE user_main_info SET {self.column} = {self.value} WHERE UID = {self.user_id}')
             con.commit()
             return True
         
         def upParam(self):
-            cur.execute(f'UPDATE user SET {self.column} = {self.column} + {self.value} WHERE uid = {self.user_id}')
+            curRPG.execute(f'UPDATE user_main_info SET {self.column} = {self.column} + {self.value} WHERE UID = {self.user_id}')
             con.commit()
             return True
         
         def downParam(self):
-            cur.execute(f'UPDATE user SET {self.column} = {self.column} - {self.value} WHERE uid = {self.user_id}')
+            curRPG.execute(f'UPDATE user_main_info SET {self.column} = {self.column} - {self.value} WHERE UID = {self.user_id}')
             con.commit()
             return True
         
         def lockMent(self):
             times = round(time.time()) + self.value
-            cur.execute(f'UPDATE user SET MentTimer = {times} WHERE uid = {self.user_id}')
+            cur.execute(f'UPDATE user_ment SET MentTimer = {times} WHERE uid = {self.user_id}')
             con.commit()
             return True
 
-
-    class BotMood:
-        def __init__(self, user: int= None):
-            self.user = user
-        
-        # Получение актуальной информации о настроении
-        def infoLove(self):
-            cur.execute(f'SELECT love_bot FROM user WHERE uid = {self.user}')
-            info = cur.fetchone()
-            if info is None:
-                return False
-            return info[0]
-        
-        def infoMood(self):
-            cur.execute(f'SELECT anger FROM bot')
-            return cur.fetchone()[0]
-
-        # Взаимодействие с эмоциями
-        # Любовь
-        def addLove(self, value=0):
-            love_now = self.infoLove()
-            if love_now + value <= 1000:
-                cur.execute(f'UPDATE user SET love_bot = love_bot + {value} WHERE uid = {self.user}')
-                con.commit()
-                return True
-            return False
-        
-        def subLove(self, value=0):
-            love_now = self.infoLove()
-            if love_now - value < 0:
-                return False
-            cur.execute(f'UPDATE user SET love_bot = love_bot - {value} WHERE uid = {self.user}')
-            con.commit()
-            return True
-
-        def updateLove(self, value=0):
-            cur.execute(f'UPDATE user SET love_bot = {value} WHERE uid = {self.user}')
-            con.commit()
-            return True
-
-        # Настроение
-        def addMood(self, value=0):
-            mood_info = self.infoMood()
-            if mood_info + value <= 1000:
-                cur.execute(f'UPDATE bot SET anger = anger + {value}')
-                con.commit()
-                return True
-            return False
-        
-        def subMood(self, value=0):
-            mood_now = self.infoMood()
-            if mood_now - value < 0:
-                return False
-            cur.execute(f'UPDATE bot SET anger = anger - {value}')
-            con.commit()
-            return True
-
-        def updateMood(self, value=0):
-            cur.execute(f'UPDATE bot SET anger = {value}')
-            con.commit()
-            return True
     class Fun:
         def __init__(self, user: int, strick=None):
             self.user = user
@@ -425,10 +264,55 @@ class DataBase:
                 if max_str[i] < user_str[i]:
                     cur.execute(f'UPDATE user_wins_max SET {ls[i]} = {user_str[i]} WHERE uid = {self.user}')
     
-    
+    class Exp:
+        def __init__(self, user_id:int, value:int) -> None:
+            self.user_id = user_id
+            self.value = value
+        
+        def add(self) -> bool:
+            curRPG.execute(f'UPDATE user_main_info SET EXP = EXP + {self.value} WHERE UID = {self.user_id}')
+            conRPG.commit()
+            return True
+        def sub(self) -> bool:
+            curRPG.execute(f'SELECT EXP FROM user_main_info WHERE UID = {self.user_id}')
+            if curRPG.fetchone() - self.value < 0:
+                return False
+            curRPG.execute(f'UPDATE user_main_info SET EXP = EXP - {self.value} WHERE UID = {self.user_id}')
+            conRPG.commit()
+            return True
+        def update(self) -> bool:
+            if self.value < 0:
+                return False
+            curRPG.execute(f'UPDATE user_main_info SET EXP = {self.value} WHERE UID = {self.user_id}')
+            conRPG.commit()
+            return True
+
+    class RPG:
+        def __init__(self) -> None:
+            pass
+        def info(self, user_id:int, table:str):
+            curRPG.execute(f'SELECT * FROM {table} WHERE UID = {user_id}')
+            return curRPG.fetchone()
+        
+        def changeUser(self, user_id:int, table:str, column:str, value):
+            try:
+                curRPG.execute(f'UPDATE {table} SET {column} WHERE UID = {user_id}')
+                curRPG.commit()
+                return True
+            except:
+                return False
+
+        def addRecord(self, table:str, dict:dict):
+            pass
+            
+
+    # TODO: Releaze function what can delet record from db. this need for delete data leave user.
     class DeleteData:
         def __init__(self, id:int):
             self.id = id
         
         def delete(self):
             pass
+
+def setup(bot:commands.Bot):
+    bot.add_cog(Db(bot))

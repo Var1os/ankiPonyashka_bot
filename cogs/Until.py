@@ -159,15 +159,14 @@ class Until(commands.Cog):
     async def leaders(self, ctx):
 
         user = ctx.message.author.id
-        usersE = db.Info().all('user')
-        usersM = db.Info().all('money')
-        usersW = db.Info().all('user_wins_max')
+        usersE = db.Info().takeFromRPG(table='user_main_info')
+        usersM = db.Info().takeFromRPG(table='user_money')
         
         # !Создание списка топ 10 участников по опыту-уровню
         # Занесение в список всех заригистрированных участников
         topListE = {}
         for index, item in enumerate(usersE):
-            topListE[item[0]] = [item[3], item[2]]
+            topListE[item[0]] = [item[2], item[1]]
         # Сортировка занесенных в список участников
         sortTopListE = sorted(topListE.items(), key= lambda items: items[1], reverse=True)
         # Поиск места в топе автора вызова лидерборда
@@ -196,7 +195,7 @@ class Until(commands.Cog):
         # !Создание списка топ 10 участников по валюте
         topListM = {}
         for index, item in enumerate(usersM):
-            summ = item[2] + item[3]*400 + item[4]*3200 + item[5]*6400
+            summ = item[1] + item[2]*400 + item[3]*3200 + item[4]*6400
             topListM[item[0]] = [summ, item[1], item[2], item[3], item[4]]
         # Сортировка занесенных в список участников
         sortTopListM = sorted(topListM.items(), key= lambda items: items[1], reverse=True)
@@ -275,31 +274,9 @@ class Until(commands.Cog):
         maps = [embed_exp, embed_money, embed_rpg]
         view = DropDownViewLeader(map=maps, user=user, time=time.time()+180)
         await ctx.send(embed=embed_exp, view=view)
-
-    @commands.command(name='wait')
-    async def wait(self, ctx):
-        
-        bot = self.bot
-        channel = ctx.message.channel
-        user = ctx.message.author.id
-        await ctx.send('Enter Command! (hello, sex)')
-        
-        self.text = '?'
-        def checker(m):
-            if m.content == 'hello' and m.channel == channel and m.author.id == user:
-                self.text = 'Boop'
-                return True
-            elif m.content == 'sex' and m.channel == channel and m.author.id == user:
-                self.text = 'Nope.'
-                return True
-            else:
-                return False
-            
-        msg = await bot.wait_for('message', check=checker, timeout=15.0)
-        if msg:
-            await channel.send(self.text)
     
-    @commands.command(name='help', aliases=['хелп', 'помощь', 'команды'])
+    # TODO: on when got ready a litle RPG content 
+    @commands.command(name='_', aliases=['хелп', 'помощь', 'команды'])
     async def help(self, ctx):
         
         user = ctx.message.author.id
@@ -438,7 +415,6 @@ s - в конце означает «души (soul)»
         view = DropDownViewHelp(map=maps, user=user, time=time.time()+1200)
         await ctx.send(embed=embed_main, view=view)
 
-
     @commands.slash_command(name='timer', description='Простая напоминалка. Указывать в минутах.' ,guild_ids=[1199488197885968515, 958063150144577558])
     async def timer(self, inter: disnake.AppCmdInter, time:int):
         if not inter.channel.id in [1205649033125830706, 992673176448417792]:
@@ -455,7 +431,6 @@ s - в конце означает «души (soul)»
         comp = [user_id, timeValue, self.bot, inter.channel.id]
         await inter.response.send_modal(modal=Modal(comp=comp))
 
-
     @commands.command(name='avatar',  aliases=['ava', 'a', 'ава', 'аватар'])
     async def avatar(self, ctx):
         
@@ -469,9 +444,6 @@ s - в конце означает «души (soul)»
         embed.set_image(ctx.message.author.avatar)
         await ctx.send(embed=embed)
     
-
-    @commands.command()
-    async def lavatar(self, ctx):
         import requests
 
         raw = ctx.guild.get_member(ctx.message.raw_mentions[0])
@@ -486,4 +458,3 @@ s - в конце означает «души (soul)»
 # Загрузка кога в основное ядро по команде
 def setup(bot:commands.Bot): 
     bot.add_cog(Until(bot))
-    print(f'Запуск модуля Until.system')

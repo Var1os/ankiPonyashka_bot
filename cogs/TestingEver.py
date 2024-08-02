@@ -445,11 +445,7 @@ class Testing(commands.Cog):
         except KeyError:
             await ctx.send(f'Очереди с ID:{id_mess} - не существует.')
     
-    @commands.command()
-    async def test(self, ctx):
-        pass
 
 
 def setup(bot:commands.Bot):
     bot.add_cog(Testing(bot))
-    print(f'Запуск модуля тестирования')

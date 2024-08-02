@@ -8,13 +8,19 @@ class Events(commands.Cog):
     def __init__(self, bot=commands.Bot):
         self.bot = bot
     
-    # Начало работы бота
+    # Preparation start
     @commands.Cog.listener()
     async def on_ready(self):
-        print('- - - - - Я начала свою работу! - - - - -')
+        pass
+        # await self.bot.get_channel(1205649033125830706).send(f'Запуск номер ``{data[2]}``')
+    
+    @commands.Cog.listener('on_ready')
+    async def on_ready_end(self):
         db.Bot.set(column='dies', value=1).add()
         data = db.Bot().info()
-        await self.bot.get_channel(1205649033125830706).send(f'Запуск номер ``{data[2]}``')
+        print(f'| Numbers start >>> {data[2]}')
+        print('_'*60)
+
     '''
     # Обработчик ошибок
     # ! Добавить кастомные варианты ошибок и ответов
@@ -31,4 +37,3 @@ class Events(commands.Cog):
 # Загрузка кога в основное ядро по команде
 def setup(bot:commands.Bot):
     bot.add_cog(Events(bot))
-    print(f'Запуск модуля Events.system')

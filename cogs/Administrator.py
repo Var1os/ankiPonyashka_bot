@@ -77,4 +77,3 @@ class Admin(commands.Cog):
 # Загрузка кога в основное ядро по команде
 def setup(bot:commands.Bot):
     bot.add_cog(Admin(bot))
-    print(f'Запуск модуля Admin.system')
