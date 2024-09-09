@@ -21,18 +21,19 @@ class Events(commands.Cog):
         print(f'| Numbers start >>> {data[2]}')
         print('_'*60)
 
-    '''
     # Обработчик ошибок
-    # ! Добавить кастомные варианты ошибок и ответов
-    @commands.Cog.listener()
-    async def on_command_error(self, ctx, error):
-        if isinstance(error, commands.MissingPermissions):
-            await ctx.send(f"{ctx.author.mention}, у вас недостаточно прав для этой команды")
-        elif isinstance(error, commands.CommandNotFound):
-            print(f"Вызвана неизвестная мне команда: {error}")
-        else:
-            print(error)'''
-    
+    # # ! Добавить кастомные варианты ошибок и ответов
+    # @commands.Cog.listener()
+    # async def on_command_error(self, ctx, error):
+    #     if isinstance(error, commands.MissingPermissions):
+    #         await ctx.send(f"{ctx.author.mention}, у вас недостаточно прав для этой команды")
+    #     elif isinstance(error, commands.CommandNotFound):
+    #         print(f"Вызвана неизвестная мне команда: {error}")
+    #     elif isinstance(error, commands.DiscordServerError):
+    #         print(f"Опять соединение прохое... (DiscordServerError: {error})")
+    #     else:
+    #         print(ctx, error)
+
 
 # Загрузка кога в основное ядро по команде
 def setup(bot:commands.Bot):

@@ -84,10 +84,12 @@ class DropDownMenuHelp(disnake.ui.StringSelect):
 
         if map is None:
             raise 'Not have map: [components] [embed]'
+            return
     
     async def callback(self, inter: disnake.MessageInteraction):
         if self.user != inter.author.id:
             await inter.response.send_message('Данное взаимодействие не ваше.', ephemeral=True)
+            return
         if self.values[0] == '1':
             embed = self.map[0]
         if self.values[0] == '2':
@@ -177,7 +179,13 @@ class Until(commands.Cog):
         # Создание списка для вывода
         EmbedText = ''
         for index, item in enumerate(sortTopListE):
-            EmbedText += f'**``{index + 1}``** <@{item[0]}>\n|ㅤ**Уровень: {item[1][1]} ``({item[1][0]} exp)``**\n'
+            user_ctx = ctx.guild.get_member(item[0])
+            try:
+                if user_ctx.nick: name = user_ctx.nick
+                else: name = user_ctx.name
+            except:
+                name = db.Info(user_id=item[0]).takeFromRPG(table='user_ds_info')[1]
+            EmbedText += f'**``{index + 1}``** **{name}**\n|ㅤУровень: {item[1][1]} ``({item[1][0]} exp)``\n'
             if index == 9:
                 break
         # Плашка с итоговой информацией 
@@ -207,7 +215,13 @@ class Until(commands.Cog):
         # Создание списка для вывода
         EmbedText = ''
         for index, item in enumerate(sortTopListM):
-            EmbedText += f'**``{index + 1}``** <@{item[0]}>\n|ㅤ**Ценность кошелька** **``({item[1][0]})``**\n'
+            user_ctx = ctx.guild.get_member(item[0])
+            try:
+                if user_ctx.nick: name = user_ctx.nick
+                else: name = user_ctx.name
+            except:
+                name = db.Info(user_id=item[0]).takeFromRPG(table='user_ds_info')[1]
+            EmbedText += f'**``{index + 1}``** **{name}**\n|ㅤЦенность кошелька ``({item[1][0]})``\n'
             if index == 9:
                 break
         # Плашка с итоговой информацией 
@@ -276,7 +290,7 @@ class Until(commands.Cog):
         await ctx.send(embed=embed_exp, view=view)
     
     # TODO: on when got ready a litle RPG content 
-    @commands.command(name='_', aliases=['хелп', 'помощь', 'команды'])
+    @commands.command(name='_') #aliases=['хелп', 'помощь', 'команды']
     async def help(self, ctx):
         
         user = ctx.message.author.id
@@ -415,7 +429,7 @@ s - в конце означает «души (soul)»
         view = DropDownViewHelp(map=maps, user=user, time=time.time()+1200)
         await ctx.send(embed=embed_main, view=view)
 
-    @commands.slash_command(name='timer', description='Простая напоминалка. Указывать в минутах.' ,guild_ids=[1199488197885968515, 958063150144577558])
+    @commands.slash_command(name='timer', description='Простая напоминалка. Указывать в минутах.', guild_ids=[1199488197885968515, 958063150144577558])
     async def timer(self, inter: disnake.AppCmdInter, time:int):
         if not inter.channel.id in [1205649033125830706, 992673176448417792]:
             return

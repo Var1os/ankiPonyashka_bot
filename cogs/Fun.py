@@ -21,6 +21,9 @@ class Fun(commands.Cog):
     # ! переработать позже
     @commands.command(name='rand', aliases=['рандом', 'ранд', 'случ'])
     async def rand(self, ctx):
+        
+        
+        
         mess = ctx.message.content.split(' ')
         elements = []
         try:

@@ -1,16 +1,63 @@
-from typing import Coroutine
 import disnake
 from disnake.ext import commands
-from random import randint
 
-import asyncio
 import json
+from time import time, strftime, gmtime
+from random import randint, choices
 
 from .module.SystemCommandRPG import *
+from .module.REQ_database import DataBase
+
+db = DataBase
 
 class RPG(commands.Cog):
     def __init__(self, bot=commands.Bot):
         self.bot = bot
+
+    @commands.command(name='bag', aliases=['мешок', 'хабар'])
+    async def bag(self, ctx):
+
+        user = ctx.message.author.id
+        stat = await userData(uid=user)
+        
+        money = stat['money']
+        text = f'## Шэкэли, что ты насобирал \n```Эссенции = {money['ESSENCE']}\nОсколки = {money['SHARD']}\nДуши = {money['SOUL']}``````Кристальные души = {money['CRISTALL_SOUL']}``````Монеты «Коширского» = {money['COU']}\nМонеты «Сущности» = {money['ACOIN']}\nМонеты «Пустоты» = {money['VCOIN']}\nМонеты «Истины» = {money['TCOIN']}```'
+
+        embed = disnake.Embed(
+            description=text
+            ).set_thumbnail(url=ctx.message.author.avatar.url)
+        await ctx.send(embed=embed)
+
+    @commands.command(name='daily', aliases=['подарок', 'сбор'])
+    async def daily(self, ctx):
+        
+        user = ctx.message.author.id
+        times = db.Lock(user_id=user, slot=5).info()[0]
+        gift = ["ESSENCE", "SHARD", "SOUL", "CRISTALL_SOUL", "COU", "VCOIN", "ACOIN", "TCOIN"]
+        gift_chance = [.559, .30, .10, .001, .01, .01, .01, .01]
+        with open('../bots/content/system/association.json', encoding='UTF-8') as file:
+            associat = json.load(file, )
+
+        if db.Lock(user_id=user, slot=5).ready():
+            drop = choices(gift, weights=gift_chance)[0]
+            color = disnake.Colour.from_rgb(255, 244, 33)
+
+            db.Money(user=user, currency=drop, value=1).add()
+            db.Lock(user_id=user, slot=5, value=43_200).lock()
+            embed = disnake.Embed(
+                title='Подарочная коробка 🎉', 
+                description=f'```Ого! Ты получил из коробки: \n>> [{associat['money'][drop]['name']}] (+1 {associat['money'][drop]['tag']}). \nПриходи завтра ещё!```',
+                colour=color)
+            await ctx.send(embed=embed)
+            return
+        good_format_time = strftime('%H:%M:%S', gmtime(times-time()))
+        color = disnake.Colour.from_rgb(89, 85, 8)
+
+        embed = disnake.Embed(
+            title='Подарочная коробка', 
+            description=f'```Увы, ты уже забирал коробочку, \nприходи чуть позже, \nскажем... \nЧерез {good_format_time}, хорошо?```',
+            colour=color)
+        await ctx.send(embed=embed)
 
     # TODO: need think how do this
     @commands.command(name='fight', aliases=['f'])
@@ -60,9 +107,9 @@ class RPG(commands.Cog):
             await inter.response.edit_message(embed=embed, components=None)
 
 
-    @commands.command(name='stat') #! Aliases add more variation
+    @commands.command(name='stat', alises=["стат", "статус"]) #! Aliases add more variation
     async def stat(self, ctx, study=False):
-        if ctx.message.author.id != 374061361606688788:
+        if ctx.message.author.id not in [374061361606688788,777612548152229888, 351617185170325515]:
             await ctx.send('В переработке~')
             return
 
@@ -86,7 +133,7 @@ class RPG(commands.Cog):
         
         # money page
         money = userDatal['money']
-        text2 = f'**Главные валюты**\n- Эссенции душ: _`{money['ESSENCE']}`_\n- Осколки душ: _`{money['SHARD']}`_\n- Души: _`{money['SOUL']}`_\n- Кристальные души: _`{money['CRISTAL_SOUL']}`_\n\n**Другие валюты**\n- Монеты «Системы»: _`{money['COU']}`_\n- Монеты «Пустоты»: _`{money['VCOIN']}`_\n- Монеты «Сущности»: _`{money['ACOIN']}`_\n- Монеты «Истины»: _`{money['TCOIN']}`_'
+        text2 = f'**Главные валюты**\n- Эссенции душ: _`{money['ESSENCE']}`_\n- Осколки душ: _`{money['SHARD']}`_\n- Души: _`{money['SOUL']}`_\n- Кристальные души: _`{money['CRISTALL_SOUL']}`_\n\n**Другие валюты**\n- Монеты «Системы»: _`{money['COU']}`_\n- Монеты «Пустоты»: _`{money['VCOIN']}`_\n- Монеты «Сущности»: _`{money['ACOIN']}`_\n- Монеты «Истины»: _`{money['TCOIN']}`_'
 
 
         # body score page
@@ -114,7 +161,7 @@ class RPG(commands.Cog):
                 additional += f'{param[item]}_`{body[item]}`_\n'
         if additional == 'p': additional = ''
         else: additional = additional.replace('p', '\n\n```Дополнительная```')
-        text3 = f'☥ **Духовная сила** - _`{body['SS']}`_ ☥\n```Основная```♥ **Здоровье (+{body['REG']/100}s):** _`{body['HP']}`_\n🐎**Ловкость:** {body['STR']}\n☗ **Защита:** _`{body['DEF']}`_\n♣ **Удача:** _`{body['LUCK']}`_\n\n🩸 **Атака:** _`{body['ATK']}`_\n🧨 **Крит.Удар:** _`{body['CRIT']/100+1}x ({body['CCRIT']}%)`_ {additional}'
+        text3 = f'☥ **Духовная сила** - _`{body['SS']}`_ ☥\n```Основная```♥ **Здоровье (+{body['REG']/100}ц):** _`{body['HP']}`_\n🐎**Ловкость:** {body['STR']}\n☗ **Защита:** _`{body['DEF']}`_\n♣ **Удача:** _`{body['LUCK']}`_\n\n🩸 **Атака:** _`{body['ATK']}`_\n🧨 **Крит.Удар:** _`{body['CRIT']/100+1}x ({body['CCRIT']}%)`_ {additional}'
 
  
         # equipment page
@@ -181,11 +228,11 @@ class RPG(commands.Cog):
 
 
         # diplomaty page
-        text7 = f''
+        text7 = f'```Да, когда-то надо```'
 
 
         # other information page
-        text8 = f''
+        text8 = f'```Возможно в этом веку```'
 
 
         embeds = {
@@ -238,24 +285,22 @@ class RPG(commands.Cog):
                 'footer':{'text':'Страница 8/8'}
                 }
             }
-        buttons = [
-            disnake.ui.Button(style=disnake.ButtonStyle.gray, label='◀', custom_id='back'),
-            disnake.ui.Button(style=disnake.ButtonStyle.gray, label='▶', custom_id='next'),
-            disnake.ui.Button(style=disnake.ButtonStyle.red, label='✖', custom_id='dropStat')
-            ]
+        if not study:
+            buttons = [
+                disnake.ui.Button(style=disnake.ButtonStyle.gray, label='◀', custom_id='back'),
+                disnake.ui.Button(style=disnake.ButtonStyle.gray, label='▶', custom_id='next'),
+                disnake.ui.Button(style=disnake.ButtonStyle.red, label='✖', custom_id='dropStat')
+                ]
         terms = int(DataBase.RPG().info(user_id=user, table='user_terms')[3]) == 1
         if terms and not study:
-            buttons.append(disnake.ui.Button(style=disnake.ButtonStyle.blurple, label='???', custom_id='talk'))
+            buttons.append(disnake.ui.Button(style=disnake.ButtonStyle.blurple, label='???', custom_id='first_talk_with_player'))
             
-        message = await ctx.send(embed=disnake.Embed.from_dict(embeds[f'{pageStart}']), components=buttons)
+        if not study: message = await ctx.send(embed=disnake.Embed.from_dict(embeds[f'{pageStart}']), components=buttons)
+        else: message = await ctx.send(embed=disnake.Embed.from_dict(embeds[f'{pageStart}']))
         message_id = message.id
 
-        if terms:
-            temporal = {
-                "phase":1,
-                "dialog_text":1,
-                "message_id":message_id
-                }
+        if terms and not study:
+            temporal = await createMetadata(message_id=message_id)
             with open(f'../bots/content/dialogs/temporal_dialog/{user}.json', mode='w', encoding='UTF-8') as file:
                 file.write(json.dumps(temporal, indent=3, ensure_ascii=False))
                 file.close()
@@ -283,12 +328,123 @@ class RPG(commands.Cog):
             file.write(json.dumps(stat_list, indent=3, ensure_ascii=False))
             file.close()
 
-        # await deleteAfterEmbed(json_name='stat_list.json', message=message, time=60)
+        await deleteAfterEmbed(json_name='stat_list.json', message=message, time=60)
 
+
+    @commands.command(name='location', aliases=['локация', 'лока'])
+    async def location(self, ctx):
+        if ctx.message.guild.id not in [374061361606688788,777612548152229888]:
+            await ctx.send('`В разработке.`')
+            return
+        check_terms_noob = db.Info(user_id=ctx.message.author.id).takeFromRPG(table='user_terms')
+        if check_terms_noob[3] == True: 
+            await ctx.send('`Сначала изучите главное в ~stat`')
+            return
+        try: 
+            user_pararmetr = ctx.message.content.split()[1]
+            user_pararmetr_command = ctx.message.content.split()[2]
+        except: pass
+
+
+    @commands.Cog.listener('on_button_click')
+    async def test_listener(self, inter:disnake.MessageInteraction):
+        if inter.component.custom_id not in ['test']:
+            return
+
+        # print(inter.response.type())
+        try:
+            print('done=', inter.response.is_done())
+            print('defer=',await inter.response.defer())
+            print('done=', inter.response.is_done())
+            print('type=', inter.component.type())
+        except:
+            print('error')
+
+
+    @commands.command(name='testdialog')
+    async def testdialog(self, ctx):
+
+        button = disnake.ui.Button(style=disnake.ButtonStyle.green, label='Начать', custom_id='testDialog')
+        message = await ctx.send('Тестовый диалог с персонажем.', components=button)
+        temporal = await createMetadata(message.id)
+        with open(f'../bots/content/dialogs/temporal_dialog/{ctx.author.id}.json', mode='w', encoding='UTF-8') as file:
+            file.write(json.dumps(temporal, indent=3, ensure_ascii=False))
+            file.close()
 
     @commands.command(name='test')
     async def test(self, ctx):
-        pass
+        await ctx.send(ctx.message)
+
+        import pickle 
+        with open('../bots/content/system/dump_file', 'wb') as file:
+            pickle.dump(ctx.message, file)
+        
+        with open('../bots/content/system/dump_file', 'wb') as file:
+            load_data = pickle.load(file)
+        
+        await ctx.send(load_data)
+ 
+        # button = disnake.ui.Button(style=disnake.ButtonStyle.gray, label='test', custom_id='test')
+        # await ctx.send('test', components=button)
+
+    @commands.command(name='test2')
+    async def test2(self, ctx):
+        print('/'*65)
+        print('/'*65)
+        print('author=', ctx.author)
+        print('-'*65)
+        print('bot=', ctx.bot)
+        print('-'*65)
+        print('channel=', ctx.channel)
+        print('-'*65)
+        print('cog=', ctx.cog)
+        print('-'*65)
+        print('command=', ctx.command)
+        print('-'*65)
+        print('guild=', ctx.guild)
+        print('-'*65)
+        print('message=', ctx.message)
+        print('-'*65)
+        print(ctx.author.id)
+
+
+        await ctx.send('correct')
+
+    @commands.command(name='test3')
+    async def test3(self, ctx):
+        messages = []
+        user = ctx.message.author.id
+        async for ctx.message in ctx.channel.history(limit=50):
+            messages.append(f'{ctx.message.author.name} >>> {ctx.message.content}\n')
+
+        # for item in messages:
+        #     print(item)
+
+        with open('../bots/content/system/text.txt', 'w') as file:
+            for item in messages:
+                file.writelines(item)
+        with open('../bots/content/system/text.txt', 'rb') as file:
+            await ctx.send(f'len_load={len(messages)}', file=disnake.File(file, 'text.txt'))
+
+
+    @commands.command(name='test4')
+    async def test4(self, ctx):
+
+        timer = round(time())
+        count = 0
+
+        async for ctx.message in ctx.channel.history(limit=None):
+            count += 1
+        
+        await ctx.send(f'times need for read= {strftime('%H:%M:%S', gmtime(round(time()-timer)))}\nCount message={count}')
+
+    @commands.command(name='test5')
+    async def test5(self, ctx):
+        role = self.bot.get_guild(ctx.author.guild.id).get_role(1260302933992542300)
+        # role = disnake.utils.get(member.guild.roles, id=1260302933992542300) 
+        await ctx.author.add_roles(role)
+        await ctx.send('all good')
+        print('Not warning, lol') 
 
 # Загрузка кога в основное ядро по команде
 def setup(bot:commands.Bot):

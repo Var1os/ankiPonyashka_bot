@@ -67,7 +67,6 @@ class Testing(commands.Cog):
 
         lvl, role_id = ctx.message.content, ctx.message.raw_mentions
 
-
     @commands.command()
     async def view(self, ctx):
         if ctx.message.guild.id != 1199488197885968515:

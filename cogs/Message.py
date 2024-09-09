@@ -1,11 +1,12 @@
 import disnake
 from disnake.ext import commands
-from .module import REQ_database as Rdb
 import random
 import time
 import json
 import sqlite3
-import asyncio
+from time import sleep
+
+from .module import REQ_database as Rdb
 
 db = Rdb.DataBase
 
@@ -21,16 +22,18 @@ class Message(commands.Cog):
     def __init__(self, bot=commands.Bot):
         self.bot = bot
     
-
     @commands.Cog.listener()
     async def on_message(self, message):
         
         # Установка главных переменных
         user = message.author.id
+        user_name = message.author.name
         timeMessage = time.strftime('%H:%M', time.gmtime(round(time.time() + 36000)))
+        
         # Проверка на ботовость того, кто отправил сообщение
-        if message.author.bot: return
-        else: db.Check(user_id=message.author.id).user()
+        if not message.author.bot: db.Check(user_id=user, user_name=user_name).user()
+        else: return
+            
 
 
         try:
@@ -40,6 +43,8 @@ class Message(commands.Cog):
             con.commit()
         except:
             pass
+
+
 
         # Проверка на упоминание пользователя и инкремент при правде
         mentioned = message.raw_mentions
@@ -52,58 +57,56 @@ class Message(commands.Cog):
                     db.User(user_id=user, value=30).lockMent()
             except:
                 pass
-            
+        # Проверка на личные сообщения
         if message.guild is None:
             print(f'Личные сообщения >>> {message.content}')
             return
+
+
+
         # Проверка актуальности уровня
         userExpNow= db.Info(user_id=user).takeFromRPG(table='user_main_info')[2]
         userLvlNow= db.Info(user_id=user).takeFromRPG(table='user_main_info')[1]
         userLvl = db.Info().positionLVL(exp=userExpNow)
-        # Загрузки конфигурацции
-        with open(f'../bots/config/levels/{message.guild.id}.json') as f:
-            level_config = json.load(f)
-            rank = []
-            for item in level_config:
-                rank.append(item)
-            f.close()
-        end = True
-        s = []
-        # Разбиваем ключи на массив связанных чисел, для проверки диапазона
-        for item in level_config: s.append(item.split('-'))
-        iser = []
-        # Проверка диапазона по связанным ключам
-        for item in s:
-            try: iser.append(int(item[0]) <= userLvl <= int(item[1]))
-            except: end = False
-        # Выдача ролей
-        bl = banList(user)
-        if end or bl:
-            ti = 0
-            for index, item in enumerate(iser):
-                if item:
-                    ti = index
-                    await message.author.add_roles(self.bot.get_guild(message.guild.id).get_role(level_config[rank[index]][0]))
-            for index, item in enumerate(iser):
-                if index != ti:
-                    await message.author.remove_roles(self.bot.get_guild(message.guild.id).get_role(level_config[rank[index]][0]))
-            
+
         if userLvl != userLvlNow:
+            db.User(column='lvl', user_id=user, value=userLvl).setParam()
             embed = disnake.Embed(
             title=f'Изменение силы души у: \n``{message.author.name}`` | ``{message.author.nick}``',
             description=f'Сила души изменилась\n```с {userLvlNow} до {userLvl}```',
             colour=disnake.Color.dark_gold()
             )
             embed.set_thumbnail(url=message.author.avatar)
-            db.User(column='lvl', user_id=user, value=userLvl).setParam()
-            print(f'Code 1 >>> Обновление уровня у пользователя {message.author.name}')
+            print(f'Code 1 >>> Обновление уровня у пользователя {message.author.name} ({userLvlNow}→{userLvl})')
             await self.bot.get_channel(992673176448417792).send(embed=embed)
-            await asyncio.sleep(1)
 
+        # Загрузки конфигурацции
+        with open(f'../bots/config/levels/{message.guild.id}.json') as file:
+            configLVL = json.load(file)
+            level_config = configLVL['levels']
 
-        # Проверка таймера реакций
-        if db.Bot(self).checkLock():
-            return
+        range_item_lvl = []
+        range_item_lvl_bool = []
+        user_role = []
+
+        # Заполнение списка ролями пользователя
+        for item in message.author.roles: user_role.append(item.id)
+        # Разбиваем ключи на список связанных чисел, для проверки диапазона
+        for item in level_config: range_item_lvl.append(item.split('-'))
+        # Проверка диапазона по связанным ключам
+        for item in range_item_lvl: range_item_lvl_bool.append(int(item[0]) <= userLvl <= int(item[1]))
+        else: del range_item_lvl
+
+        from .Message import banList
+        ban_list = banList(user)
+        # Изменение ролей
+        if ban_list:
+            for index, item in enumerate(level_config):
+                if not level_config[item] in user_role and range_item_lvl_bool[index]:
+                    await message.author.add_roles(self.bot.get_guild(message.guild.id).get_role(level_config[item]))
+                elif level_config[item] in user_role and not range_item_lvl_bool[index]:
+                    await message.author.remove_roles(self.bot.get_guild(message.guild.id).get_role(level_config[item]))
+
 
         # Загрузка конфигов
         with open('../bots/config/message_cfg.json') as file:
@@ -112,13 +115,14 @@ class Message(commands.Cog):
         if message.author.id != 374061361606688788:
             # Выпадения опыта ~30% и денег с шансом ~10%
             # Шанс выпадения шарда с шансом 0,005%
-            valueRandom = random.randint(1, 1000)
+            valueRandomXP = random.randint(1, 1000)
+            valueRandomM = random.randint(1, 1000)
             valuePupet = random.randint(1,5)
-            if valueRandom <= config['exp']:  # Выпадение опыта ')
+            if valueRandomXP <= config['exp']:  # Выпадение опыта ')
                 db.Exp(user_id=user, value=valuePupet).add()
                 db.Bot(value=10).lock()
                 return
-            if valueRandom <= config['money']:  # Выпадение денег
+            elif valueRandomM <= config['money']:  # Выпадение денег
                 val = random.randint(0, 1000)
                 if val <= config['super_money']:
                     db.Money(user=user, currency='SHARD', value=valuePupet).add()
@@ -126,13 +130,13 @@ class Message(commands.Cog):
                 db.Money(user=user, value=valuePupet).add()
                 db.Bot(value=10).lock()
                 return
+        
 
-        # Исключение частых символов
-        simbol = '/.,&?!()'
-        content = message.content
-        for item in simbol:
-            content = content.replace(item, '')
-
+        # Проверка таймера реакций
+        if db.Bot(self).checkLock():
+            return
+            
+            
         # Проверка на разрешенный канал
         file = open(f"../bots/acesses/{message.guild.id}.txt", mode='a+')
         file.seek(0)
@@ -140,10 +144,16 @@ class Message(commands.Cog):
         for item in file:
             susc.append(item.rstrip())
         file.close()
-
         # Проверка на канал в котором произошел ивент
         if str(message.channel.id) not in susc:
             return
+        
+
+        # Исключение частых символов
+        simbol = '/.,&?!()'
+        content = message.content
+        for item in simbol:
+            content = content.replace(item, '')
         # простые слова-реакции
         file = open('../bots/React_text/Base_react_pony.txt', mode='r', encoding='utf-8')
         num = random.randint(1, 1000)
@@ -152,21 +162,24 @@ class Message(commands.Cog):
             mass_react.append(ent.rstrip())
         file.close()
         
+
         # Случайные реакции поняшки
         if num <= config['text_react_chance']:
             await message.channel.send(f"_{random.choice(mass_react)}_")
             db.Bot(value=config['text_react_timer']).lock()
             return
-        # if num <= config['emoji_react_chance']:
-        #     emoji = message.guild.emojis
-        #     await message.channel.send(random.choice(emoji))
-        #     db.Bot(value=config['emoji_react_timer']).lock()
-        #     return
+        if num <= config['emoji_react_chance']:
+            emoji = message.guild.emojis
+            await message.channel.send(random.choice(emoji))
+            db.Bot(value=config['emoji_react_timer']).lock()
+            return
         # if num <= config['reaction_react_chance']:
         #     emoji = message.guild.emojis
         #     await message.add_reaction(random.choice(emoji))
         #     db.Bot(value=config['reaction_react_timer']).lock()
-            return
+        #    return
+
+        
         # Слова на которые откликается бот
         react_role = config['reaction_word']
         if message.author.id == 374061361606688788:

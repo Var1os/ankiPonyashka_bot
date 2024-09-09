@@ -11,7 +11,17 @@ class RpgCommand(commands.Cog):
         self.bot = bot
 
 
+async def createMetadata(message_id) -> dict:
+    temporal = {
+                "id":'S0',
+                "next":"S0",
+                "route_select":False,
+                "exit":False,
+                "message_id":message_id,
 
+                "buffer":1
+                }
+    return temporal
 
 #? Command for delete different embeds through time
 async def deleteAfterEmbed(json_name:str, message:object, time:int) -> bool:
@@ -98,7 +108,7 @@ async def userData(uid:int) -> dict:
             "ESSENCE":user_M[1],
             "SHARD":user_M[2],
             "SOUL":user_M[3],
-            "CRISTAL_SOUL":user_M[4],
+            "CRISTALL_SOUL":user_M[4],
             "COU":user_M[5],
             "VCOIN":user_M[6],
             "ACOIN":user_M[7],
@@ -176,7 +186,8 @@ async def userData(uid:int) -> dict:
 
 
 
-
+async def CTX_ToDumpPickle(ctx):
+    pass
 
 # unstatic load module, it`s just for simplicity
 def setup(bot:commands.Bot):
