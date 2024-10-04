@@ -2,11 +2,13 @@ import disnake
 from disnake.ext import commands
 
 import json
+import time
 from time import time, strftime, gmtime
 from random import randint, choices
 
 from .module.SystemCommandRPG import *
 from .module.REQ_database import DataBase
+from .materials.enemy_base.lowEnemy import Goblin
 
 db = DataBase
 
@@ -28,7 +30,7 @@ class RPG(commands.Cog):
             ).set_thumbnail(url=ctx.message.author.avatar.url)
         await ctx.send(embed=embed)
 
-    @commands.command(name='daily', aliases=['подарок', 'сбор'])
+    @commands.command(name='daily', aliases=['подарок', 'сбор', 'gift'])
     async def daily(self, ctx):
         
         user = ctx.message.author.id
@@ -50,7 +52,7 @@ class RPG(commands.Cog):
                 colour=color)
             await ctx.send(embed=embed)
             return
-        good_format_time = strftime('%H:%M:%S', gmtime(times-time()))
+        good_format_time = strftime('%H:%M:%S', gmtime(times-time.time()))
         color = disnake.Colour.from_rgb(89, 85, 8)
 
         embed = disnake.Embed(
@@ -62,9 +64,39 @@ class RPG(commands.Cog):
     # TODO: need think how do this
     @commands.command(name='fight', aliases=['f'])
     async def fight(self, ctx):
-        pass
-    
+        
+        #? Основное определение визуальной части системы боя
+        embed = disnake.Embed()
+        embed.title = ''
 
+        enemyForm = ''
+        base = []
+        for i in range(randint(1, 5)):
+            base.append(Goblin())
+        else: base
+        for index, item in enumerate(base): enemyForm += f'{index+1}. {item.name} ({item.HP}hp)\n'
+        
+        playerForm = ''
+        for i in range(3): playerForm += f'{i+1}. Игрок/соратник\n'
+        
+
+        embed.description = f'## Testing fight system\n`{enemyForm}`\n```\t/ - / - / - /```\n`{playerForm}`'
+        embed.set_thumbnail(url='https://media.discordapp.net/attachments/1206487729995517962/1244870023017664614/gqwaSu0_wRo.jpg?ex=66ea570e&is=66e9058e&hm=c83116a688a7d724ec03c9e342c577018e5763f4bf0b4b095ab7fe692d5a6048&=&format=webp&width=577&height=676')
+
+        #? Определение кнопочек боя
+        buttons = await getButtonsFight()
+        
+        #? Определение важных элементов контейнера
+        players = []
+
+        #? Контейнер с информацией о бое и доп информация
+        container = {
+            "message":ctx.message.id,
+            "players":players
+            }
+        
+        await ctx.send(embed=embed, components=buttons)
+    
     #! listener for switching pages
     @commands.Cog.listener('on_button_click')
     async def stat_list(self, inter: disnake.MessageInteraction):
@@ -345,6 +377,17 @@ class RPG(commands.Cog):
             user_pararmetr_command = ctx.message.content.split()[2]
         except: pass
 
+    @commands.command(name='carddrop', aliases=['card'])
+    async def card(self, ctx):
+        mast = ['пики ♠', 'буби ♦', 'червы ♥', 'трефы ♣']
+        value = [2, 3, 4, 5, 6, 7, 8, 9, 'Валет', 'Дама', 'Король', 'Туз']
+
+        text = f'{choice(value)} {choice(mast)}'
+        if randint(1, 100) > 90:
+            text = f'О нет! {choice('Красный', 'Черный')} джокер!'
+        
+        embed = disnake.Embed(title=text)
+        await ctx.send(embed=embed)
 
     @commands.Cog.listener('on_button_click')
     async def test_listener(self, inter:disnake.MessageInteraction):
@@ -373,43 +416,43 @@ class RPG(commands.Cog):
 
     @commands.command(name='test')
     async def test(self, ctx):
-        await ctx.send(ctx.message)
-
-        import pickle 
-        with open('../bots/content/system/dump_file', 'wb') as file:
-            pickle.dump(ctx.message, file)
-        
-        with open('../bots/content/system/dump_file', 'wb') as file:
-            load_data = pickle.load(file)
-        
-        await ctx.send(load_data)
- 
-        # button = disnake.ui.Button(style=disnake.ButtonStyle.gray, label='test', custom_id='test')
-        # await ctx.send('test', components=button)
+        name = ctx.message.content.replace(f'{ctx.message.content.split(' ')[0]} ', '')
+        try: foundPoke, rare = await findPokemonInDatabaseLikeName(name=name)
+        except: 
+            foundPoke = await findPokemonInDatebase(ID=name)
+            rare = name.split('-')
+        try: crafteble = 'Да' if foundPoke['crafteble'] else 'Нет'
+        except: crafteble = 'Неизвестно'
+        try: desc = foundPoke['description']
+        except: desc = '-Отсутсвует-'
+        try: gif = foundPoke['gif']
+        except: gif=None
+        embed = disnake.Embed(
+            title=f'Покемон [{foundPoke['name']}]',
+            description=f'`Описание:`\n{desc}\n\n',
+            )
+        embed.add_field(name='Цена', value=f'{foundPoke['price']}')
+        embed.add_field(name='Доход', value=f'{foundPoke['income']}')
+        embed.add_field(name='Редкость', value=f'{rare[0]}-{rare[1]}')
+        embed.set_thumbnail(url=gif)
+        embed.set_footer(text=f'Возможность крафта: {crafteble}')
+        await ctx.send(embed=embed)
 
     @commands.command(name='test2')
     async def test2(self, ctx):
-        print('/'*65)
-        print('/'*65)
-        print('author=', ctx.author)
-        print('-'*65)
-        print('bot=', ctx.bot)
-        print('-'*65)
-        print('channel=', ctx.channel)
-        print('-'*65)
-        print('cog=', ctx.cog)
-        print('-'*65)
-        print('command=', ctx.command)
-        print('-'*65)
-        print('guild=', ctx.guild)
-        print('-'*65)
-        print('message=', ctx.message)
-        print('-'*65)
-        print(ctx.author.id)
+        data = await RollLotery(user=ctx.author.id, count=10, sys=True)
+        text = ''
+        for index, item in enumerate(data['loot']):
+            text += f'## ({index+1})→ {item[1]['name']} `(Rank: {item[0]})`\n'
+        embed = disnake.Embed(
+            description=f"# ```Ты выиграл в лотери...```\n{text}\n## `{data['compliment']}`\n",
+            colour=disnake.Colour.dark_gold()           
+            )
+        embed.set_footer(text=f'Крутил барабан: {ctx.author.name}')
+        await savePokemon(loot=data['loot'], uid=ctx.author.id)
+        await ctx.send(embed=embed)
 
-
-        await ctx.send('correct')
-
+    #? save history channel
     @commands.command(name='test3')
     async def test3(self, ctx):
         messages = []
@@ -426,7 +469,7 @@ class RPG(commands.Cog):
         with open('../bots/content/system/text.txt', 'rb') as file:
             await ctx.send(f'len_load={len(messages)}', file=disnake.File(file, 'text.txt'))
 
-
+    #? calculate summ all message in channel and give time writing
     @commands.command(name='test4')
     async def test4(self, ctx):
 
@@ -439,12 +482,10 @@ class RPG(commands.Cog):
         await ctx.send(f'times need for read= {strftime('%H:%M:%S', gmtime(round(time()-timer)))}\nCount message={count}')
 
     @commands.command(name='test5')
-    async def test5(self, ctx):
-        role = self.bot.get_guild(ctx.author.guild.id).get_role(1260302933992542300)
-        # role = disnake.utils.get(member.guild.roles, id=1260302933992542300) 
-        await ctx.author.add_roles(role)
-        await ctx.send('all good')
-        print('Not warning, lol') 
+    async def clearConsole(self, ctx):
+        import os
+        os.system('cls')
+
 
 # Загрузка кога в основное ядро по команде
 def setup(bot:commands.Bot):

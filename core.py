@@ -10,8 +10,8 @@ bot = commands.Bot(command_prefix='~',
                    reload=True, 
                    help_command=None,
                    description=desc)
-loadRange = ['Economics', 'Message', 'Events', 'Fun', 'Rpg', 'Administrator', 'Until', 'TestingEver', 'module.SystemDialogsRPG', 'module.SystemCommandRPG', 'module.SystemShop']
 
+loadRange = ['Economics', 'Message', 'Events', 'Fun', 'Rpg', 'Administrator', 'Until', 'TestingEver', 'module.SystemDialogsRPG', 'module.SystemCommandRPG', 'module.SystemShop']
 for index in range(len(loadRange)-1):
     bot.load_extension(f'cogs.{loadRange[index]}')
 

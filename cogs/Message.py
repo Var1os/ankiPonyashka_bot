@@ -59,7 +59,7 @@ class Message(commands.Cog):
                 pass
         # Проверка на личные сообщения
         if message.guild is None:
-            print(f'Личные сообщения >>> {message.content}')
+            print(f'Личные сообщения от ({message.author.name}) >>> {message.content}')
             return
 
 
@@ -102,11 +102,17 @@ class Message(commands.Cog):
         # Изменение ролей
         if ban_list:
             for index, item in enumerate(level_config):
-                if not level_config[item] in user_role and range_item_lvl_bool[index]:
-                    await message.author.add_roles(self.bot.get_guild(message.guild.id).get_role(level_config[item]))
-                elif level_config[item] in user_role and not range_item_lvl_bool[index]:
-                    await message.author.remove_roles(self.bot.get_guild(message.guild.id).get_role(level_config[item]))
-
+                try:
+                    if not level_config[item] in user_role and range_item_lvl_bool[index]:
+                        await message.author.add_roles(self.bot.get_guild(message.guild.id).get_role(level_config[item]))
+                    elif level_config[item] in user_role and not range_item_lvl_bool[index]:
+                        await message.author.remove_roles(self.bot.get_guild(message.guild.id).get_role(level_config[item]))
+                except:
+                    # BUG: Отладить этот ебучий баг, и найти причину его появления, а то я в душе не ебу хули оно мозги делает
+                    print('\t\t< ↓ Error ↓ >\t\t')
+                    print(f'authorError={message.author.name}')
+                    print(f'level_config[{item}]({type(level_config[item])}) = {level_config[item]}')
+                    print('\t\t< ↑ Error ↑ >\t\t')
 
         # Загрузка конфигов
         with open('../bots/config/message_cfg.json') as file:

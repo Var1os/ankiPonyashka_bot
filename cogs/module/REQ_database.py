@@ -34,39 +34,46 @@ class DataBase:
                 cur.execute("INSERT INTO user_wins_max VALUES (?, ?, ?, ?)", (self.user_id, 0, 0, 0))
 
 
+            #? Pokefile
+            curRPG.execute(f'SELECT * FROM user_money_poke WHERE UID = {self.user_id}')
+            if curRPG.fetchone() is None:
+                num+=1
+                curRPG.execute(f"INSERT INTO user_money_poke (UID) VALUES ({self.user_id})")
+
+
             #? RPG module
             curRPG.execute(f'SELECT * FROM user_active_inventory WHERE UID = {self.user_id}')
             if curRPG.fetchone() is None:
                 num+=1
-                curRPG.execute("INSERT INTO user_active_inventory VALUES (?, ?, ?, ?, ?, ?)", (self.user_id, 0, 0, 0, 0, 0))
+                curRPG.execute(f"INSERT INTO user_active_inventory (UID) VALUES ({self.user_id})")
             curRPG.execute(f'SELECT * FROM user_diplomaty WHERE UID = {self.user_id}')
             if curRPG.fetchone() is None:
                 num+=1
-                curRPG.execute("INSERT INTO user_diplomaty VALUES (?,?,?,?,?,?,?,?,?)", (self.user_id,0,0,0,0,0,0,0,0))
+                curRPG.execute(f"INSERT INTO user_diplomaty (UID) VALUES ({self.user_id})",)
             curRPG.execute(f'SELECT * FROM user_equipment WHERE UID = {self.user_id}')
             if curRPG.fetchone() is None:
                 num+=1
-                curRPG.execute("INSERT INTO user_equipment VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)", (self.user_id,0,0,0,0,0,0,0,0,0,0,0,0,0))
+                curRPG.execute(f"INSERT INTO user_equipment (UID) VALUES ({self.user_id})")
             curRPG.execute(f"SELECT * FROM user_main_info WHERE UID = {self.user_id}")
             if curRPG.fetchone() is None:
                 num+=1
-                curRPG.execute("INSERT INTO user_main_info VALUES (?,?,?,?)", (self.user_id,0,0,0))
+                curRPG.execute(f"INSERT INTO user_main_info (UID) VALUES ({self.user_id})")
             curRPG.execute(f"SELECT * FROM user_money WHERE UID = {self.user_id}")
             if curRPG.fetchone() is None:
                 num+=1
-                curRPG.execute('INSERT INTO user_money VALUES (?,?,?,?,?,?,?,?,?)', (self.user_id,0,0,0,0,0,0,0,0))
+                curRPG.execute(f'INSERT INTO user_money (UID) VALUES ({self.user_id})')
             curRPG.execute(f"SELECT * FROM user_parametr WHERE UID = {self.user_id}")
             if curRPG.fetchone() is None:
                 num+=1
-                curRPG.execute('INSERT INTO user_parametr VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)', (self.user_id,10,5,1,1,1,25,10,0,10,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0))
+                curRPG.execute(f'INSERT INTO user_parametr (UID) VALUES ({self.user_id})')
             curRPG.execute(f'SELECT * FROM user_blocktime WHERE UID = {self.user_id}')
             if curRPG.fetchone() is None:
                 num+=1
-                curRPG.execute('INSERT INTO user_blocktime VALUES (?,?,?,?,?,?)', (self.user_id,0,0,0,0,0))
+                curRPG.execute(f'INSERT INTO user_blocktime (UID) VALUES ({self.user_id})')
             curRPG.execute(f'SELECT * FROM user_terms WHERE UID = {self.user_id}')
             if curRPG.fetchone() is None:
                 num+=1
-                curRPG.execute('INSERT INTO user_terms VALUES (?,?,?,?)', (self.user_id,False,0,True))
+                curRPG.execute(f'INSERT INTO user_terms (UID) VALUES ({self.user_id})')
             curRPG.execute(f'SELECT * FROM user_ds_info WHERE UID = {self.user_id}')
             names_update = curRPG.fetchone()
             if not names_update:
@@ -75,7 +82,12 @@ class DataBase:
             elif names_update:
                 if names_update[1] != self.user_name:
                     num+=1
-                    curRPG.execute(f'UPDATE user_ds_info SET NAME = {self.user_name} WHERE UID = {self.user_id}')
+                    curRPG.execute(f"UPDATE user_ds_info SET NAME = '{self.user_name}' WHERE UID = '{self.user_id}'")
+            # curRPG.execute(f'SELECT * FROM user_reputation WHERE UID = {self.user_id}')
+            # if curRPG.fetchone() is None:
+            #     num+=1
+            #     curRPG.execute(f"INSERT INTO user_reputation (UID) VALUES ({self.user_id})")
+
 
             conRPG.commit()
             con.commit()
@@ -105,29 +117,27 @@ class DataBase:
             if self.currency in ["ESSENCE", "SHARD", "SOUL", "CRISTALL_SOUL", "COU", "VCOIN", "ACOIN", "TCOIN"]:
                 curRPG.execute(f'UPDATE user_money SET {self.currency} = {self.currency} + {self.value} WHERE UID = {self.user}')
             else: return False
-            
             conRPG.commit()
             return True
         def sub(self) -> bool:
             if self.currency in ["ESSENCE", "SHARD", "SOUL", "CRISTALL_SOUL", "COU", "VCOIN", "ACOIN", "TCOIN"]:
-                cur.execute(f'SELECT {self.currency} FROM user_money WHERE UID = {self.user}')
-                if curRPG.fetchone()[0] - self.value < 0: 
-                    cur.execute(f'UPDATE user_money SET {self.currency} = {self.currency} - {self.value} WHERE UID = {self.user}')
+                curRPG.execute(f'SELECT {self.currency} FROM user_money WHERE UID = {self.user}')
+                if curRPG.fetchone()[0] - self.value >= 0: 
+                    curRPG.execute(f'UPDATE user_money SET {self.currency} = {self.currency} - {self.value} WHERE UID = {self.user}')
                 else: return False
             else: return False
-
-            con.commit()
+            conRPG.commit()
             return True
         def update(self) -> bool:
             if self.currency in ["ESSENCE", "SHARD", "SOUL", "CRISTALL_SOUL", "COU", "VCOIN", "ACOIN", "TCOIN"]:
-                cur.execute(f'UPDATE user_money SET {self.currency} = {self.value} WHERE UID = {self.user_id}')
+                curRPG.execute(f'UPDATE user_money SET {self.currency} = {self.value} WHERE UID = {self.user}')
             else: return False
-            con.commit()
+            conRPG.commit()
             return True
         
-        def have(self) -> tuple:
-            cur.execute(f'SELECT {self.currency} FROM user_money WHERE UID = {self.user}')
-            return cur.fetchone()[0]
+        def have(self) -> int:
+            curRPG.execute(f'SELECT {self.currency} FROM user_money WHERE UID = {self.user}')
+            return curRPG.fetchone()[0]
         
     class Info:
         def __init__(self, user_id= None):
@@ -155,6 +165,31 @@ class DataBase:
         def user(self):
             cur.execute(f'SELECT * FROM user_ment WHERE uid = {self.user_id}')
             return cur.fetchone()
+    
+    class Poke:
+        def __init__(self, user) -> None:
+            self.user = user
+
+        def add(self, value, column='STRIKE') -> bool:
+            curRPG.execute(f'UPDATE user_money_poke SET {column} = {column} + {value} WHERE UID = {self.user}')
+            conRPG.commit()
+            return True
+        def sub(self, value, column='STRIKE') -> bool:
+            curRPG.execute(f'SELECT {column} FROM user_money_poke WHERE UID = {self.user}')
+            if curRPG.fetchone()[0] - self.value >= 0: 
+                curRPG.execute(f'UPDATE user_money_poke SET {column} = {column} - {value} WHERE UID = {self.user}')
+            else: return False
+            conRPG.commit()
+            return True
+        def update(self, value=0, time:bool=True) -> bool:
+            if time: curRPG.execute(f'UPDATE user_money_poke SET TIMESTAMP = {value} WHERE UID = {self.user}')
+            else: curRPG.execute(f'UPDATE user_money_poke SET STRIKE = {value} WHERE UID = {self.user}')
+            conRPG.commit()
+            return True
+        
+        def takeAll(self) -> tuple:
+            curRPG.execute(f'SELECT * FROM user_money_poke WHERE UID = {self.user}')
+            return curRPG.fetchone()
 
     class Bot:
         def __init__(self, value=0):
@@ -313,7 +348,11 @@ class DataBase:
             pass
             
     class Lock:
-        def __init__(self, user_id:int, slot:int=None, value:int=0):
+        '''
+        Slot: 1-5
+        Value: second
+        '''
+        def __init__(self, user_id:int, slot:int, value:int=0):
             self.user_id = user_id
             self.slot = slot
             self.value = value

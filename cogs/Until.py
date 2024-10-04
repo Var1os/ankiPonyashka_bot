@@ -220,8 +220,10 @@ class Until(commands.Cog):
                 if user_ctx.nick: name = user_ctx.nick
                 else: name = user_ctx.name
             except:
-                name = db.Info(user_id=item[0]).takeFromRPG(table='user_ds_info')[1]
-            EmbedText += f'**``{index + 1}``** **{name}**\n|ㅤЦенность кошелька ``({item[1][0]})``\n'
+                try:
+                    name = db.Info(user_id=int(item[0])).takeFromRPG(table='user_ds_info')[1]
+                except: name = '`[unknow]`'
+            EmbedText += f'**``{index + 1}``** **{name}**\n|ㅤЦенность кошелька ``({item[1][0]:,})``\n'
             if index == 9:
                 break
         # Плашка с итоговой информацией 

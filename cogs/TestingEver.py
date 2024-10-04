@@ -184,7 +184,10 @@ class Testing(commands.Cog):
                 directory = "../bots/content/icon"
                 # Получаем список файлов
                 files = os.listdir(directory)
-                files.remove('desktop.ini')
+                
+                try: files.remove('desktop.ini')
+                except: pass
+
                 text = ''
                 for index, item in enumerate(files):
                     if index == len(files)-1:
@@ -444,7 +447,29 @@ class Testing(commands.Cog):
         except KeyError:
             await ctx.send(f'Очереди с ID:{id_mess} - не существует.')
     
+    @commands.command()
+    async def slideshow(self, ctx):
+        import os
+        from time import sleep
+        # Указываем путь к директории
+        directory = "../bots/content/icon/slide_show"
+        # Получаем список файлов
+        files = os.listdir(directory)
+        try: 
+            cooldown = ctx.message.content.split()[1]
+            if type(cooldown) != int: cooldown = 5
+        except: cooldown = 5
 
+        embed = disnake.Embed(title=f'Файл номер= 1')
+        embed.set_image(file=disnake.File(f'../bots/content/icon/slide_show/{files[0]}'))
+        message = await ctx.send(embed=embed)
+        sleep(5)
+        for index, item in enumerate(files):
+            if index == 0: continue
+            embed = disnake.Embed(title=f'Файл номер= {index+1}')
+            embed.set_image(file=disnake.File(f'../bots/content/icon/slide_show/{item}'))
+            await message.edit(embed=embed)
+            sleep(5)
 
 def setup(bot:commands.Bot):
     bot.add_cog(Testing(bot))
