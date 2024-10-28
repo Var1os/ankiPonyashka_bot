@@ -1,5 +1,6 @@
 token.txt
--apps-/
+_apps_/
+_site_/
 config/
 content/
 other_content/

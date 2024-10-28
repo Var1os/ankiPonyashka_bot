@@ -21,6 +21,20 @@ class Events(commands.Cog):
         print(f'| Numbers start >>> {data[2]}')
         print('_'*60)
 
+    @commands.Cog.listener('member_join')
+    async def member_join(self, member):
+
+        if not member.author.bot: db.Check(user_id=member.author.id, user_name=member.author.name).user()
+        else: return
+        print(f'On database add user: {member.author.name}')
+
+    @commands.Cog.listener('member_remove')
+    async def member_remove(self, member):
+
+        if not member.author.bot: db.DeleteData(user_id=member.author.id).delete()
+        else: return
+        print(f'On database delete user: {member.author.name}')
+
     # Обработчик ошибок
     # # ! Добавить кастомные варианты ошибок и ответов
     # @commands.Cog.listener()

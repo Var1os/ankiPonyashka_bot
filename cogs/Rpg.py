@@ -16,28 +16,14 @@ class RPG(commands.Cog):
     def __init__(self, bot=commands.Bot):
         self.bot = bot
 
-    @commands.command(name='bag', aliases=['мешок', 'хабар'])
-    async def bag(self, ctx):
-
-        user = ctx.message.author.id
-        stat = await userData(uid=user)
-        
-        money = stat['money']
-        text = f'## Шэкэли, что ты насобирал \n```Эссенции = {money['ESSENCE']}\nОсколки = {money['SHARD']}\nДуши = {money['SOUL']}``````Кристальные души = {money['CRISTALL_SOUL']}``````Монеты «Коширского» = {money['COU']}\nМонеты «Сущности» = {money['ACOIN']}\nМонеты «Пустоты» = {money['VCOIN']}\nМонеты «Истины» = {money['TCOIN']}```'
-
-        embed = disnake.Embed(
-            description=text
-            ).set_thumbnail(url=ctx.message.author.avatar.url)
-        await ctx.send(embed=embed)
-
     @commands.command(name='daily', aliases=['подарок', 'сбор', 'gift'])
     async def daily(self, ctx):
         
         user = ctx.message.author.id
         times = db.Lock(user_id=user, slot=5).info()[0]
         gift = ["ESSENCE", "SHARD", "SOUL", "CRISTALL_SOUL", "COU", "VCOIN", "ACOIN", "TCOIN"]
-        gift_chance = [.559, .30, .10, .001, .01, .01, .01, .01]
-        with open('../bots/content/system/association.json', encoding='UTF-8') as file:
+        gift_chance = [.459, .40, .10, .001, .01, .01, .01, .01]
+        with open('../PonyashkaDiscord/content/system/association.json', encoding='UTF-8') as file:
             associat = json.load(file, )
 
         if db.Lock(user_id=user, slot=5).ready():
@@ -104,7 +90,7 @@ class RPG(commands.Cog):
             return
         
         try:
-            with open('../bots/config/stat_list.json', encoding='UTF-8') as file:
+            with open('../PonyashkaDiscord/config/stat_list.json', encoding='UTF-8') as file:
                 stat_list = json.load(file)
                 file.close()
 
@@ -131,7 +117,7 @@ class RPG(commands.Cog):
                 await inter.response.edit_message(embed=embed, components=None)
                 return
             
-            with open('../bots/config/stat_list.json', mode='w', encoding='UTF-8', ) as file:
+            with open('../PonyashkaDiscord/config/stat_list.json', mode='w', encoding='UTF-8', ) as file:
                 file.write(json.dumps(stat_list, indent=3, ensure_ascii=False))
                 file.close()
         except:
@@ -333,12 +319,12 @@ class RPG(commands.Cog):
 
         if terms and not study:
             temporal = await createMetadata(message_id=message_id)
-            with open(f'../bots/content/dialogs/temporal_dialog/{user}.json', mode='w', encoding='UTF-8') as file:
+            with open(f'../PonyashkaDiscord/content/dialogs/temporal_dialog/{user}.json', mode='w', encoding='UTF-8') as file:
                 file.write(json.dumps(temporal, indent=3, ensure_ascii=False))
                 file.close()
 
         try: 
-            with open('../bots/config/stat_list.json') as file:
+            with open('../PonyashkaDiscord/config/stat_list.json') as file:
                 stat_list = json.load(file)
                 file.close()
         except: pass
@@ -356,7 +342,7 @@ class RPG(commands.Cog):
                     'embeds':embeds
                     }
                 }
-        with open('../bots/config/stat_list.json', 'w', encoding='UTF-8') as file:
+        with open('../PonyashkaDiscord/config/stat_list.json', 'w', encoding='UTF-8') as file:
             file.write(json.dumps(stat_list, indent=3, ensure_ascii=False))
             file.close()
 
@@ -377,114 +363,6 @@ class RPG(commands.Cog):
             user_pararmetr_command = ctx.message.content.split()[2]
         except: pass
 
-    @commands.command(name='carddrop', aliases=['card'])
-    async def card(self, ctx):
-        mast = ['пики ♠', 'буби ♦', 'червы ♥', 'трефы ♣']
-        value = [2, 3, 4, 5, 6, 7, 8, 9, 'Валет', 'Дама', 'Король', 'Туз']
-
-        text = f'{choice(value)} {choice(mast)}'
-        if randint(1, 100) > 90:
-            text = f'О нет! {choice('Красный', 'Черный')} джокер!'
-        
-        embed = disnake.Embed(title=text)
-        await ctx.send(embed=embed)
-
-    @commands.Cog.listener('on_button_click')
-    async def test_listener(self, inter:disnake.MessageInteraction):
-        if inter.component.custom_id not in ['test']:
-            return
-
-        # print(inter.response.type())
-        try:
-            print('done=', inter.response.is_done())
-            print('defer=',await inter.response.defer())
-            print('done=', inter.response.is_done())
-            print('type=', inter.component.type())
-        except:
-            print('error')
-
-
-    @commands.command(name='testdialog')
-    async def testdialog(self, ctx):
-
-        button = disnake.ui.Button(style=disnake.ButtonStyle.green, label='Начать', custom_id='testDialog')
-        message = await ctx.send('Тестовый диалог с персонажем.', components=button)
-        temporal = await createMetadata(message.id)
-        with open(f'../bots/content/dialogs/temporal_dialog/{ctx.author.id}.json', mode='w', encoding='UTF-8') as file:
-            file.write(json.dumps(temporal, indent=3, ensure_ascii=False))
-            file.close()
-
-    @commands.command(name='test')
-    async def test(self, ctx):
-        name = ctx.message.content.replace(f'{ctx.message.content.split(' ')[0]} ', '')
-        try: foundPoke, rare = await findPokemonInDatabaseLikeName(name=name)
-        except: 
-            foundPoke = await findPokemonInDatebase(ID=name)
-            rare = name.split('-')
-        try: crafteble = 'Да' if foundPoke['crafteble'] else 'Нет'
-        except: crafteble = 'Неизвестно'
-        try: desc = foundPoke['description']
-        except: desc = '-Отсутсвует-'
-        try: gif = foundPoke['gif']
-        except: gif=None
-        embed = disnake.Embed(
-            title=f'Покемон [{foundPoke['name']}]',
-            description=f'`Описание:`\n{desc}\n\n',
-            )
-        embed.add_field(name='Цена', value=f'{foundPoke['price']}')
-        embed.add_field(name='Доход', value=f'{foundPoke['income']}')
-        embed.add_field(name='Редкость', value=f'{rare[0]}-{rare[1]}')
-        embed.set_thumbnail(url=gif)
-        embed.set_footer(text=f'Возможность крафта: {crafteble}')
-        await ctx.send(embed=embed)
-
-    @commands.command(name='test2')
-    async def test2(self, ctx):
-        data = await RollLotery(user=ctx.author.id, count=10, sys=True)
-        text = ''
-        for index, item in enumerate(data['loot']):
-            text += f'## ({index+1})→ {item[1]['name']} `(Rank: {item[0]})`\n'
-        embed = disnake.Embed(
-            description=f"# ```Ты выиграл в лотери...```\n{text}\n## `{data['compliment']}`\n",
-            colour=disnake.Colour.dark_gold()           
-            )
-        embed.set_footer(text=f'Крутил барабан: {ctx.author.name}')
-        await savePokemon(loot=data['loot'], uid=ctx.author.id)
-        await ctx.send(embed=embed)
-
-    #? save history channel
-    @commands.command(name='test3')
-    async def test3(self, ctx):
-        messages = []
-        user = ctx.message.author.id
-        async for ctx.message in ctx.channel.history(limit=50):
-            messages.append(f'{ctx.message.author.name} >>> {ctx.message.content}\n')
-
-        # for item in messages:
-        #     print(item)
-
-        with open('../bots/content/system/text.txt', 'w') as file:
-            for item in messages:
-                file.writelines(item)
-        with open('../bots/content/system/text.txt', 'rb') as file:
-            await ctx.send(f'len_load={len(messages)}', file=disnake.File(file, 'text.txt'))
-
-    #? calculate summ all message in channel and give time writing
-    @commands.command(name='test4')
-    async def test4(self, ctx):
-
-        timer = round(time())
-        count = 0
-
-        async for ctx.message in ctx.channel.history(limit=None):
-            count += 1
-        
-        await ctx.send(f'times need for read= {strftime('%H:%M:%S', gmtime(round(time()-timer)))}\nCount message={count}')
-
-    @commands.command(name='test5')
-    async def clearConsole(self, ctx):
-        import os
-        os.system('cls')
 
 
 # Загрузка кога в основное ядро по команде
