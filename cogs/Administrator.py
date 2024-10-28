@@ -16,7 +16,7 @@ class Admin(commands.Cog):
     async def addChannel(self, ctx):
 
         # Открытие файла
-        file = open(f'../bots/acesses/{ctx.guild.id}.txt', mode="a+")
+        file = open(f'../PonyashkaDiscord/acesses/{ctx.guild.id}.txt', mode="a+")
         file.seek(0)
 
         channel = ctx.message.raw_channel_mentions
@@ -28,7 +28,7 @@ class Admin(commands.Cog):
                 for ent in file:
                     list_channel.append(ent.rstrip())
                 sus = True
-                if os.stat(f'../bots/acesses/{ctx.guild.id}.txt').st_size == 0:
+                if os.stat(f'../PonyashkaDiscord/acesses/{ctx.guild.id}.txt').st_size == 0:
                     file.writelines(f"{item}\n")
                     continue
 
@@ -54,7 +54,7 @@ class Admin(commands.Cog):
     async def RChannel(self, ctx):
 
         # Считка параметров файла
-        file = open(f'../bots/acesses/{ctx.guild.id}.txt', mode="a+")
+        file = open(f'../PonyashkaDiscord/acesses/{ctx.guild.id}.txt', mode="a+")
         file.seek(0)
 
         channelList = ''

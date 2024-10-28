@@ -4,8 +4,8 @@ from disnake.ext import commands
 import sqlite3
 import time
 
-con = sqlite3.connect('../bots/_system.db')
-conRPG = sqlite3.connect('../bots/_rpg.db')
+con = sqlite3.connect('../PonyashkaDiscord/_system.db')
+conRPG = sqlite3.connect('../PonyashkaDiscord/_rpg.db')
 cur = con.cursor()
 curRPG = conRPG.cursor()
 
@@ -35,10 +35,10 @@ class DataBase:
 
 
             #? Pokefile
-            curRPG.execute(f'SELECT * FROM user_money_poke WHERE UID = {self.user_id}')
+            curRPG.execute(f'SELECT * FROM user_poke WHERE UID = {self.user_id}')
             if curRPG.fetchone() is None:
                 num+=1
-                curRPG.execute(f"INSERT INTO user_money_poke (UID) VALUES ({self.user_id})")
+                curRPG.execute(f"INSERT INTO user_poke (UID) VALUES ({self.user_id})")
 
 
             #? RPG module
@@ -119,6 +119,7 @@ class DataBase:
             else: return False
             conRPG.commit()
             return True
+        
         def sub(self) -> bool:
             if self.currency in ["ESSENCE", "SHARD", "SOUL", "CRISTALL_SOUL", "COU", "VCOIN", "ACOIN", "TCOIN"]:
                 curRPG.execute(f'SELECT {self.currency} FROM user_money WHERE UID = {self.user}')
@@ -171,24 +172,24 @@ class DataBase:
             self.user = user
 
         def add(self, value, column='STRIKE') -> bool:
-            curRPG.execute(f'UPDATE user_money_poke SET {column} = {column} + {value} WHERE UID = {self.user}')
+            curRPG.execute(f'UPDATE user_poke SET {column} = {column} + {value} WHERE UID = {self.user}')
             conRPG.commit()
             return True
         def sub(self, value, column='STRIKE') -> bool:
-            curRPG.execute(f'SELECT {column} FROM user_money_poke WHERE UID = {self.user}')
+            curRPG.execute(f'SELECT {column} FROM user_poke WHERE UID = {self.user}')
             if curRPG.fetchone()[0] - self.value >= 0: 
-                curRPG.execute(f'UPDATE user_money_poke SET {column} = {column} - {value} WHERE UID = {self.user}')
+                curRPG.execute(f'UPDATE user_poke SET {column} = {column} - {value} WHERE UID = {self.user}')
             else: return False
             conRPG.commit()
             return True
         def update(self, value=0, time:bool=True) -> bool:
-            if time: curRPG.execute(f'UPDATE user_money_poke SET TIMESTAMP = {value} WHERE UID = {self.user}')
-            else: curRPG.execute(f'UPDATE user_money_poke SET STRIKE = {value} WHERE UID = {self.user}')
+            if time: curRPG.execute(f'UPDATE user_poke SET TIMESTAMP = {value} WHERE UID = {self.user}')
+            else: curRPG.execute(f'UPDATE user_poke SET STRIKE = {value} WHERE UID = {self.user}')
             conRPG.commit()
             return True
         
         def takeAll(self) -> tuple:
-            curRPG.execute(f'SELECT * FROM user_money_poke WHERE UID = {self.user}')
+            curRPG.execute(f'SELECT * FROM user_poke WHERE UID = {self.user}')
             return curRPG.fetchone()
 
     class Bot:
@@ -376,6 +377,16 @@ class DataBase:
             self.user_id = id
         
         def delete(self):
-            list_rpg = ['user_money', 'user_active_inventory', 'user_blocktime', 'user_diplomaty', 'user_ds_info', 'user_equipment', 'user_main_info', 'user_parametr', 'user_reputation', 'user_terms']
+            list_rpg = ['user_money', 'user_active_inventory', 'user_blocktime', 'user_diplomaty', 'user_ds_info', 'user_equipment', 'user_main_info', 'user_parametr', 'user_reputation', 'user_terms', 'user_poke']
             list_system = ['user_ment', 'user_wins', 'user_wins_max']
-            
+
+            try:
+                for item in list_rpg:
+                    curRPG.execute(f'DELETE FROM {item} WHERE UID = {self.user_id}')
+                else: conRPG.commit()
+                
+                for item in list_system:
+                    cur.execute(f'DELETE FROM {item} WHERE UID = {self.user_id}')
+                else: con.commit()
+                return True
+            except: return False

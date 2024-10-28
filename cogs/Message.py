@@ -11,7 +11,7 @@ from .module import REQ_database as Rdb
 db = Rdb.DataBase
 
 def banList(UID:int) -> bool:
-    with open('../bots/config/message_banList.json') as file:
+    with open('../PonyashkaDiscord/config/message_banList.json') as file:
         config = json.load(file)
         file.close()
         if UID in config['list']:
@@ -37,7 +37,7 @@ class Message(commands.Cog):
 
 
         try:
-            con = sqlite3.connect('../bots/_system.db')
+            con = sqlite3.connect('../PonyashkaDiscord/_system.db')
             cur = con.cursor()
             cur.execute(f"UPDATE channel_data SET count = count + 1 WHERE ID = {message.channel.id}")
             con.commit()
@@ -81,7 +81,7 @@ class Message(commands.Cog):
             await self.bot.get_channel(992673176448417792).send(embed=embed)
 
         # Загрузки конфигурацции
-        with open(f'../bots/config/levels/{message.guild.id}.json') as file:
+        with open(f'../PonyashkaDiscord/config/levels/{message.guild.id}.json') as file:
             configLVL = json.load(file)
             level_config = configLVL['levels']
 
@@ -115,7 +115,7 @@ class Message(commands.Cog):
                     print('\t\t< ↑ Error ↑ >\t\t')
 
         # Загрузка конфигов
-        with open('../bots/config/message_cfg.json') as file:
+        with open('../PonyashkaDiscord/config/message_cfg.json') as file:
             config = json.load(file)
         # Проверка на создателя
         if message.author.id != 374061361606688788:
@@ -144,7 +144,7 @@ class Message(commands.Cog):
             
             
         # Проверка на разрешенный канал
-        file = open(f"../bots/acesses/{message.guild.id}.txt", mode='a+')
+        file = open(f"../PonyashkaDiscord/acesses/{message.guild.id}.txt", mode='a+')
         file.seek(0)
         susc = []
         for item in file:
@@ -161,7 +161,7 @@ class Message(commands.Cog):
         for item in simbol:
             content = content.replace(item, '')
         # простые слова-реакции
-        file = open('../bots/React_text/Base_react_pony.txt', mode='r', encoding='utf-8')
+        file = open('../PonyashkaDiscord/React_text/Base_react_pony.txt', mode='r', encoding='utf-8')
         num = random.randint(1, 1000)
         mass_react = []
         for ent in file:

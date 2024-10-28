@@ -62,7 +62,7 @@ class Testing(commands.Cog):
 
     async def lvl_set(self, ctx):
         import sqlite3
-        con = sqlite3.connect('../bots/database.db')
+        con = sqlite3.connect('../PonyashkaDiscord/database.db')
         cur = con.cursor()
 
         lvl, role_id = ctx.message.content, ctx.message.raw_mentions
@@ -74,13 +74,13 @@ class Testing(commands.Cog):
         
         ids = ctx.message.content.split()
         try:
-            with open(f'../bots/content/location/{ids[1]}.json', encoding='UTF-8') as f:
+            with open(f'../PonyashkaDiscord/content/location/{ids[1]}.json', encoding='UTF-8') as f:
                 config = json.load(f)
 
             try:
                 param = ctx.message.content.split()
                 if param[2] == 'take':
-                    await ctx.send('Ваш файлик!',file=disnake.File(f'../bots/content/location/{ids[1]}.json'))
+                    await ctx.send('Ваш файлик!',file=disnake.File(f'../PonyashkaDiscord/content/location/{ids[1]}.json'))
                 else:
                     await ctx.send(config[f'{param[2]}'])
             except:
@@ -89,13 +89,13 @@ class Testing(commands.Cog):
         except:
             try:
                 # Указываем путь к директории
-                directory = "../bots/content/location"
+                directory = "../PonyashkaDiscord/content/location"
                 # Получаем список файлов
                 files = os.listdir(directory)
                 text = ''
                 if ids[1] == 'name':
                     for item in files:
-                        with open(f'../bots/content/location/{item}', 'r', encoding='UTF-8') as f:
+                        with open(f'../PonyashkaDiscord/content/location/{item}', 'r', encoding='UTF-8') as f:
                             config = json.load(f)
                             name = item.replace('.json', '')
                             text += f'{name} — {config['name']}\n'
@@ -104,7 +104,7 @@ class Testing(commands.Cog):
                     await ctx.send(f'Такой ({ids[1]}) локации нет. Либо-же в файле была ошибка.')
             except:
                 # Указываем путь к директории
-                directory = "../bots/content/location"
+                directory = "../PonyashkaDiscord/content/location"
                 # Получаем список файлов
                 files = os.listdir(directory)
 
@@ -139,7 +139,7 @@ class Testing(commands.Cog):
             
             import requests
             responce = requests.get(url=url_atth)
-            with open(f'../bots/content/location/{name_atth}', 'wb') as file:
+            with open(f'../PonyashkaDiscord/content/location/{name_atth}', 'wb') as file:
                 file.write(responce.content)
             file.close()
 
@@ -155,11 +155,11 @@ class Testing(commands.Cog):
         ids = m[1] # айди файла
         param = m[2] # Параметр для свапа
         val = m[3] # значение свапа
-        with open(f'../bots/content/location/{ids}.json', 'r', encoding='UTF-8') as f:
+        with open(f'../PonyashkaDiscord/content/location/{ids}.json', 'r', encoding='UTF-8') as f:
             config = json.load(f)
             config[param] = val
             f.close()
-        with open(f'../bots/content/location/{ids}.json', 'w', encoding='UTF-8') as f:
+        with open(f'../PonyashkaDiscord/content/location/{ids}.json', 'w', encoding='UTF-8') as f:
             json.dump(config, f, indent=2, ensure_ascii=False)
             f.close()
         await ctx.send('Я изменила параметр! Проверяй!')
@@ -176,12 +176,12 @@ class Testing(commands.Cog):
             try:
                 select = ctx.message.content.split()
                 embed = disnake.Embed(title='Проверка загрузки кастома')
-                embed.set_image(file=disnake.File(f'../bots/content/icon/{select[1]}'))
+                embed.set_image(file=disnake.File(f'../PonyashkaDiscord/content/icon/{select[1]}'))
                 await ctx.send(embed=embed)
             except:
                 import os
                 # Указываем путь к директории
-                directory = "../bots/content/icon"
+                directory = "../PonyashkaDiscord/content/icon"
                 # Получаем список файлов
                 files = os.listdir(directory)
                 
@@ -213,7 +213,7 @@ class Testing(commands.Cog):
 
             import requests
             responce = requests.get(url=url_atth)
-            with open(f'../bots/content/icon/{name_atth}', 'wb') as file:
+            with open(f'../PonyashkaDiscord/content/icon/{name_atth}', 'wb') as file:
                 file.write(responce.content)
             file.close()
             await ctx.send('Я сделять!')
@@ -223,7 +223,7 @@ class Testing(commands.Cog):
 
         import sqlite3
         import time
-        con = sqlite3.connect('../bots/database.db')
+        con = sqlite3.connect('../PonyashkaDiscord/database.db')
         cur = con.cursor()
         
         threads = ctx.guild.threads
@@ -252,7 +252,7 @@ class Testing(commands.Cog):
     async def chk(self, ctx):
         
 
-        with open('../bots/other_content/RP/magic.txt', encoding='UTF-8') as f:
+        with open('../PonyashkaDiscord/other_content/RP/magic.txt', encoding='UTF-8') as f:
             magic = f.read().split(', ')
             f.close()
 
@@ -286,7 +286,7 @@ class Testing(commands.Cog):
         
         try:
             # Подгрузка файла с очередью
-            with open('../bots/config/que_list.json', encoding='UTF-8') as f:
+            with open('../PonyashkaDiscord/config/que_list.json', encoding='UTF-8') as f:
                 que_list_embed = json.load(f)
                 f.close()
 
@@ -342,7 +342,7 @@ class Testing(commands.Cog):
                 embed = disnake.Embed(title=title, description=text)
                 
             list_j['que_list'] = que_list
-            with open('../bots/config/que_list.json', encoding='UTF-8', mode='w') as f:
+            with open('../PonyashkaDiscord/config/que_list.json', encoding='UTF-8', mode='w') as f:
                 f.write(json.dumps(que_list_embed, indent=3, ensure_ascii=False))
                 f.close()
             await inter.response.edit_message(embed=embed)
@@ -371,7 +371,7 @@ class Testing(commands.Cog):
         message = await ctx.send(embed=embed, components=button)
         
         try:
-            with open('../bots/config/que_list.json', encoding='UTF-8') as f:
+            with open('../PonyashkaDiscord/config/que_list.json', encoding='UTF-8') as f:
                 que_list_embed = json.load(f)
                 f.close()
         except:
@@ -402,7 +402,7 @@ class Testing(commands.Cog):
                     }
                 }
 
-        with open('../bots/config/que_list.json', encoding='UTF-8', mode='w') as f:
+        with open('../PonyashkaDiscord/config/que_list.json', encoding='UTF-8', mode='w') as f:
             f.write(json.dumps(que_list_embed, indent=3, ensure_ascii=False))
             f.close()
 
@@ -416,7 +416,7 @@ class Testing(commands.Cog):
             id_mess = ctx.message.content.split()[1]
         except:
             try:
-                with open('../bots/config/que_list.json', encoding='UTF-8') as f:
+                with open('../PonyashkaDiscord/config/que_list.json', encoding='UTF-8') as f:
                     que_list_embed = json.load(f)
                 f.close()
                 text = ''
@@ -433,12 +433,12 @@ class Testing(commands.Cog):
                 return
         
         try:
-            with open('../bots/config/que_list.json', encoding='UTF-8') as f:
+            with open('../PonyashkaDiscord/config/que_list.json', encoding='UTF-8') as f:
                 que_list_embed = json.load(f)
                 message_url = que_list_embed[id_mess]['jump_message']
             del que_list_embed[f'{id_mess}']
             f.close()
-            with open('../bots/config/que_list.json', encoding='UTF-8', mode='w') as f:
+            with open('../PonyashkaDiscord/config/que_list.json', encoding='UTF-8', mode='w') as f:
                 f.write(json.dumps(que_list_embed, indent=3, ensure_ascii=False))
             f.close()
             message = await self.bot.get_guild(message_url[0]).get_channel(message_url[1]).fetch_message(message_url[2])
@@ -452,7 +452,7 @@ class Testing(commands.Cog):
         import os
         from time import sleep
         # Указываем путь к директории
-        directory = "../bots/content/icon/slide_show"
+        directory = "../PonyashkaDiscord/content/icon/slide_show"
         # Получаем список файлов
         files = os.listdir(directory)
         try: 
@@ -461,13 +461,13 @@ class Testing(commands.Cog):
         except: cooldown = 5
 
         embed = disnake.Embed(title=f'Файл номер= 1')
-        embed.set_image(file=disnake.File(f'../bots/content/icon/slide_show/{files[0]}'))
+        embed.set_image(file=disnake.File(f'../PonyashkaDiscord/content/icon/slide_show/{files[0]}'))
         message = await ctx.send(embed=embed)
         sleep(5)
         for index, item in enumerate(files):
             if index == 0: continue
             embed = disnake.Embed(title=f'Файл номер= {index+1}')
-            embed.set_image(file=disnake.File(f'../bots/content/icon/slide_show/{item}'))
+            embed.set_image(file=disnake.File(f'../PonyashkaDiscord/content/icon/slide_show/{item}'))
             await message.edit(embed=embed)
             sleep(5)
 

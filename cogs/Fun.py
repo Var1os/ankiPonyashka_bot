@@ -53,7 +53,7 @@ class Fun(commands.Cog):
 
     @commands.command(name='gif', aliases=['гиф', 'гифка'])
     async def gif(self, ctx):
-        file = open('../bots/other_content/Gif/base.txt', mode='r')
+        file = open('../PonyashkaDiscord/other_content/Gif/base.txt', mode='r')
 
         gifs = []
         for item in file:
@@ -64,7 +64,7 @@ class Fun(commands.Cog):
 
     @commands.command(name='gifadd', aliases=['добгиф', 'новгиф'])
     async def gifadd(self, ctx):
-        file = open('../bots/other_content/Gif/base.txt', mode='r')
+        file = open('../PonyashkaDiscord/other_content/Gif/base.txt', mode='r')
 
         try:
             gifs_user = ctx.message.content.split(' ')[1]
@@ -84,7 +84,7 @@ class Fun(commands.Cog):
             await ctx.send('Добавлено в список')
             gifs.append(gifs_user)
         
-        file = open('../bots/content/Gif/base.txt', mode='w')
+        file = open('../PonyashkaDiscord/content/Gif/base.txt', mode='w')
         for i in range(len(gifs)):
             file.writelines(f'{gifs[i]}\n')
         file.close()
