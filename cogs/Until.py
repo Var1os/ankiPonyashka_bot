@@ -471,6 +471,10 @@ s - в конце означает «души (soul)»
 
         await ctx.send(f'/ all ok')
 
+    @commands.command(name='pomogator')
+    async def pomogite(self, ctx):
+        await ctx.send('Укажите ваш запрос')
+
 # Загрузка кога в основное ядро по команде
 def setup(bot:commands.Bot): 
     bot.add_cog(Until(bot))
